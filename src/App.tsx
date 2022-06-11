@@ -1,13 +1,51 @@
 import { useRef, useState } from 'react';
 import { Stage, Layer, Circle, Line } from 'react-konva';
 import { Html } from 'react-konva-utils';
+import { Spring, animated } from '@react-spring/konva';
 
 import { generateBattlefield } from './services/battlefield';
 import { TPlanet } from './services/planet';
 
-const Planet = ({ color, radius, position }: TPlanet) => {
+const Planet = ({
+  color,
+  radius,
+  position,
+  selected,
+  onClick,
+}: TPlanet & { selected: boolean; onClick: () => void }) => {
   return (
-    <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
+    <>
+      <Circle
+        fill={color}
+        radius={radius}
+        x={position[0]}
+        y={position[1]}
+        onClick={onClick}
+      />
+      {selected && (
+        <Spring
+          from={{ rotation: 0 }}
+          to={{
+            rotation: 180,
+          }}
+          loop={true}
+        >
+          {(props) => {
+            return (
+              <animated.Circle
+                stroke={color}
+                strokeWidth={2}
+                radius={radius + 4}
+                x={position[0]}
+                y={position[1]}
+                dash={[10, 10, 10, 10]}
+                {...props}
+              />
+            );
+          }}
+        </Spring>
+      )}
+    </>
   );
 };
 
@@ -21,6 +59,8 @@ const App = () => {
   const [{ planets, routes }, setBattlefield] = useState(
     regenerateBattlefield()
   );
+
+  const [selectedPlanetId, setSelectedPlanetId] = useState<null | string>(null);
 
   const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
     const gradient: any =
@@ -49,9 +89,6 @@ const App = () => {
             Refresh
           </button>
         </Html>
-        {planets.map((planet) => {
-          return <Planet key={planet.id} {...planet} />;
-        })}
 
         {Object.entries(routes).flatMap(([planetId, otherPlanetIds]) => {
           const planet = planets.find((candidate) => candidate.id === planetId);
@@ -69,6 +106,17 @@ const App = () => {
               />
             );
           });
+        })}
+
+        {planets.map((planet) => {
+          return (
+            <Planet
+              key={planet.id}
+              {...planet}
+              onClick={() => setSelectedPlanetId(planet.id)}
+              selected={planet.id === selectedPlanetId}
+            />
+          );
         })}
       </Layer>
     </Stage>
