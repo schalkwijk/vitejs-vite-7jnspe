@@ -10,6 +10,9 @@ type TPlanet = {
   position: [number, number];
 };
 
+type PositionAndRadius = Pick<TPlanet, 'position' | 'radius'>;
+type Position = TPlanet['position'];
+
 const Planet = ({ color, radius, position }: TPlanet) => {
   return (
     <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
@@ -20,13 +23,21 @@ const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-type PositionAndRadius = Pick<TPlanet, 'position' | 'radius'>;
-
 const atArmsLength = (
   positionAndRadius: PositionAndRadius,
-  planets: Array<TPlanet>
+  planets: Array<TPlanet>,
+  arm: number
 ) => {
-  
+  const distance = (positionA: Position, positionB: Position) => {
+    return Math.sqrt(
+      Math.pow(positionA[0] - positionB[0], 2) +
+        Math.pow(positionA[1] - positionB[1], 2)
+    );
+  };
+  return !planets.some((planet) => {
+    const { radius, position } = positionAndRadius;
+    return distance(position, planet.position) < radius + planet.radius + arm;
+  });
 };
 
 const generatePlanets = ({
@@ -41,14 +52,14 @@ const generatePlanets = ({
 
   const getPositionAndRadius = (): PositionAndRadius => {
     const radius = getRandomInt(10, 30);
-    const x = radius + getRandomInt(50, box[0] - radius * 2);
-    const y = radius + getRandomInt(50, box[1] - radius * 2);
+    const x = getRandomInt(radius, box[0] - radius);
+    const y = getRandomInt(radius, box[1] - radius);
     return { position: [x, y], radius };
   };
 
   for (let i = 0; i < count; i++) {
     let positionAndRadius = getPositionAndRadius();
-    while (!atArmsLength(positionAndRadius, planets)) {
+    while (!atArmsLength(positionAndRadius, planets, 50)) {
       positionAndRadius = getPositionAndRadius();
     }
 
@@ -65,7 +76,7 @@ const App = () => {
   const width = window.innerWidth - 100;
   const height = window.innerHeight - 100;
   const regeneratePlanets = () =>
-    generatePlanets({ count: 20, box: [width, height] });
+    generatePlanets({ count: 15, box: [width, height] });
   const [planets, setPlanets] = useState(regeneratePlanets());
 
   return (
