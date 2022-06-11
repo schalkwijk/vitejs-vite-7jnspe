@@ -1,17 +1,9 @@
-import { useState } from 'react';
-import { v4 as uuid } from 'uuid';
-import { Stage, Layer, Circle } from 'react-konva';
+import { useRef, useState } from 'react';
+import { Stage, Layer, Circle, Line } from 'react-konva';
 import { Html } from 'react-konva-utils';
 
-type TPlanet = {
-  id: string;
-  color: string;
-  radius: number;
-  position: [number, number];
-};
-
-type PositionAndRadius = Pick<TPlanet, 'position' | 'radius'>;
-type Position = TPlanet['position'];
+import { generateBattlefield } from './services/battlefield';
+import { TPlanet } from './services/planet';
 
 const Planet = ({ color, radius, position }: TPlanet) => {
   return (
@@ -19,79 +11,64 @@ const Planet = ({ color, radius, position }: TPlanet) => {
   );
 };
 
-const getRandomInt = (min: number, max: number) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const atArmsLength = (
-  positionAndRadius: PositionAndRadius,
-  planets: Array<TPlanet>,
-  arm: number
-) => {
-  const distance = (positionA: Position, positionB: Position) => {
-    return Math.sqrt(
-      Math.pow(positionA[0] - positionB[0], 2) +
-        Math.pow(positionA[1] - positionB[1], 2)
-    );
-  };
-  return !planets.some((planet) => {
-    const { radius, position } = positionAndRadius;
-    return distance(position, planet.position) < radius + planet.radius + arm;
-  });
-};
-
-const generatePlanets = ({
-  count,
-  box,
-}: {
-  count: number;
-  box: [number, number];
-}): Array<TPlanet> => {
-  const colors = ['#7FDBFF', '#39CCCC', '#FF851B', '#FFFFFF'];
-  const planets: Array<TPlanet> = [];
-
-  const getPositionAndRadius = (): PositionAndRadius => {
-    const radius = getRandomInt(10, 30);
-    const x = getRandomInt(radius, box[0] - radius);
-    const y = getRandomInt(radius, box[1] - radius);
-    return { position: [x, y], radius };
-  };
-
-  for (let i = 0; i < count; i++) {
-    let positionAndRadius = getPositionAndRadius();
-    while (!atArmsLength(positionAndRadius, planets, 50)) {
-      positionAndRadius = getPositionAndRadius();
-    }
-
-    planets.push({
-      color: colors[getRandomInt(0, 3)],
-      id: uuid(),
-      ...positionAndRadius,
-    });
-  }
-  return planets;
-};
-
 const App = () => {
   const width = window.innerWidth - 100;
   const height = window.innerHeight - 100;
-  const regeneratePlanets = () =>
-    generatePlanets({ count: 15, box: [width, height] });
-  const [planets, setPlanets] = useState(regeneratePlanets());
+  const stage = useRef(null);
+  const regenerateBattlefield = () =>
+    generateBattlefield({ planetCount: 5, box: [width, height] });
+
+  const [{ planets, routes }, setBattlefield] = useState(
+    regenerateBattlefield()
+  );
+
+  const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
+    const gradient: any =
+      stage.current &&
+      (stage.current as any).bufferCanvas._canvas
+        .getContext('2d')
+        // gradients are scoped globally since we're pulling the context off the total canvas
+        .createLinearGradient(...[...planetA.position, ...planetB.position]);
+
+    if (gradient) {
+      gradient.addColorStop(0.0, planetA.color);
+      gradient.addColorStop(1.0, planetB.color);
+    }
+
+    return gradient;
+  };
 
   return (
-    <Stage width={width} height={height}>
+    <Stage width={width} height={height} ref={stage}>
       <Layer>
         <Html>
           <button
             style={{ position: 'absolute', left: 10, top: -30 }}
-            onClick={() => setPlanets(regeneratePlanets())}
+            onClick={() => setBattlefield(regenerateBattlefield())}
           >
             Refresh
           </button>
         </Html>
         {planets.map((planet) => {
           return <Planet key={planet.id} {...planet} />;
+        })}
+
+        {Object.entries(routes).flatMap(([planetId, otherPlanetIds]) => {
+          const planet = planets.find((candidate) => candidate.id === planetId);
+          return otherPlanetIds.map((otherPlanetId) => {
+            const otherPlanet = planets.find(
+              (candidate) => candidate.id === otherPlanetId
+            );
+
+            return (
+              <Line
+                key={planet!.id + otherPlanet!.id}
+                points={[...planet!.position, ...otherPlanet!.position]}
+                strokeWidth={2}
+                stroke={gradientCreator(planet!, otherPlanet!)}
+              />
+            );
+          });
         })}
       </Layer>
     </Stage>
