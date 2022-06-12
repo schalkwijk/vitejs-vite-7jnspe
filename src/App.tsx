@@ -1,10 +1,53 @@
 import { useRef, useState } from 'react';
-import { Stage, Layer, Circle, Line, Text, Group } from 'react-konva';
+import {
+  Stage,
+  Layer,
+  Circle,
+  Line,
+  Text,
+  Group,
+  RegularPolygon,
+} from 'react-konva';
 import { Html } from 'react-konva-utils';
 import { Spring, animated } from '@react-spring/konva';
 
 import { generateBattlefield } from './services/battlefield';
 import { TPlanet } from './services/planet';
+
+const RouteStart = ({
+  sourcePlanet,
+  targetPlanet,
+}: {
+  sourcePlanet: TPlanet;
+  targetPlanet: TPlanet;
+}) => {
+  const x1 = sourcePlanet.position[0];
+  const y1 = sourcePlanet.position[1];
+  const x2 = targetPlanet.position[0];
+  const y2 = targetPlanet.position[1];
+  const theta = Math.atan2(y1 - y2, x2 - x1);
+
+  const finalX =
+    Math.cos(theta) * sourcePlanet.radius + sourcePlanet.position[0];
+  const finalY = // -1 since the y axis increases when you go down
+    -1 * Math.sin(theta) * sourcePlanet.radius + sourcePlanet.position[1];
+
+  return (
+    <RegularPolygon
+      sides={3}
+      radius={sourcePlanet.radius * 0.8}
+      fill={sourcePlanet.color}
+      x={finalX}
+      y={finalY}
+      opacity={0.7}
+      // need to convert from radians to degrees
+      // also, the 90 is here since konva sees rotations
+      // as angles clockwise from the y axis, while regular
+      // math sees it as angles counter-clockwise from the x axis
+      rotation={90 - theta * (180 / Math.PI)}
+    />
+  );
+};
 
 const Planet = ({
   color,
@@ -59,7 +102,7 @@ const App = () => {
   const height = window.innerHeight - 100;
   const stage = useRef(null);
   const regenerateBattlefield = () =>
-    generateBattlefield({ planetCount: 15, box: [width, height] });
+    generateBattlefield({ planetCount: 10, box: [width, height] });
 
   const [{ planets, routes }, setBattlefield] = useState(
     regenerateBattlefield()
@@ -103,12 +146,19 @@ const App = () => {
             );
 
             return (
-              <Line
-                key={planet!.id + otherPlanet!.id}
-                points={[...planet!.position, ...otherPlanet!.position]}
-                strokeWidth={2}
-                stroke={gradientCreator(planet!, otherPlanet!)}
-              />
+              <>
+                <Line
+                  key={`line-${planet!.id + otherPlanet!.id}`}
+                  points={[...planet!.position, ...otherPlanet!.position]}
+                  strokeWidth={2}
+                  stroke={gradientCreator(planet!, otherPlanet!)}
+                />
+                <RouteStart
+                  key={`route-${planet!.id + otherPlanet!.id}`}
+                  sourcePlanet={planet!}
+                  targetPlanet={otherPlanet!}
+                />
+              </>
             );
           });
         })}
