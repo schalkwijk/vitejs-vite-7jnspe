@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Stage, Layer, Circle, Line } from 'react-konva';
+import { Stage, Layer, Circle, Line, Text } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import { Spring, animated } from '@react-spring/konva';
 
@@ -20,6 +20,16 @@ const Planet = ({
         radius={radius}
         x={position[0]}
         y={position[1]}
+        onClick={onClick}
+      />
+      <Text
+        x={position[0] - radius - 1}
+        y={position[1] - radius}
+        text={radius.toString()}
+        align="center"
+        verticalAlign="middle"
+        width={radius * 2}
+        height={radius * 2}
         onClick={onClick}
       />
       {selected && (
