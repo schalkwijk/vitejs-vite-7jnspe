@@ -1,15 +1,7 @@
 import { useRef, useState } from 'react';
-import {
-  Stage,
-  Layer,
-  Circle,
-  Line,
-  Text,
-  Group,
-  RegularPolygon,
-} from 'react-konva';
+import { Stage, Layer, Circle, Line, Text, Group } from 'react-konva';
 import { Html } from 'react-konva-utils';
-import { Spring, animated } from '@react-spring/konva';
+import { animated, useSpring } from '@react-spring/konva';
 
 import { generateBattlefield } from './services/battlefield';
 import { TPlanet } from './services/planet';
@@ -32,13 +24,21 @@ const RouteStart = ({
   const finalY = // -1 since the y axis increases when you go down
     -1 * Math.sin(theta) * sourcePlanet.radius + sourcePlanet.position[1];
 
+  const motion = useSpring({
+    from: { x: finalX, y: finalY, radius: sourcePlanet.radius },
+    to: {
+      x: targetPlanet.position[0],
+      y: targetPlanet.position[1],
+      radius: targetPlanet.radius,
+    },
+    config: { duration: 2500 },
+  });
+
   return (
-    <RegularPolygon
+    <animated.RegularPolygon
       sides={3}
-      radius={sourcePlanet.radius * 0.8}
       fill={sourcePlanet.color}
-      x={finalX}
-      y={finalY}
+      {...motion}
       opacity={0.7}
       // need to convert from radians to degrees
       // also, the 90 is here since konva sees rotations
@@ -57,6 +57,14 @@ const Planet = ({
   onClick,
 }: TPlanet & { selected: boolean; onClick: () => void }) => {
   const [locked, setLocked] = useState(false);
+  const styles = useSpring({
+    from: { rotation: 0 },
+    to: {
+      rotation: 360,
+    },
+    config: { duration: 2500 },
+    loop: true,
+  });
   return (
     <Group onClick={onClick}>
       <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
@@ -70,28 +78,15 @@ const Planet = ({
         height={radius * 2}
       />
       {selected && (
-        <Spring
-          from={{ rotation: 0 }}
-          to={{
-            rotation: 360,
-          }}
-          config={{ duration: 2500 }}
-          loop={true}
-        >
-          {(props) => {
-            return (
-              <animated.Circle
-                stroke={color}
-                strokeWidth={2}
-                radius={radius + 4}
-                x={position[0]}
-                y={position[1]}
-                dash={[10]}
-                {...props}
-              />
-            );
-          }}
-        </Spring>
+        <animated.Circle
+          stroke={color}
+          strokeWidth={2}
+          radius={radius + 4}
+          x={position[0]}
+          y={position[1]}
+          dash={[10]}
+          {...styles}
+        />
       )}
     </Group>
   );
