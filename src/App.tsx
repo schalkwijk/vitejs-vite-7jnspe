@@ -26,8 +26,9 @@ const Planet = ({
         <Spring
           from={{ rotation: 0 }}
           to={{
-            rotation: 180,
+            rotation: 360,
           }}
+          config={{ duration: 2500 }}
           loop={true}
         >
           {(props) => {
@@ -38,7 +39,7 @@ const Planet = ({
                 radius={radius + 4}
                 x={position[0]}
                 y={position[1]}
-                dash={[10, 10, 10, 10]}
+                dash={[10, 10, 10, 10, 10]}
                 {...props}
               />
             );
@@ -54,7 +55,7 @@ const App = () => {
   const height = window.innerHeight - 100;
   const stage = useRef(null);
   const regenerateBattlefield = () =>
-    generateBattlefield({ planetCount: 5, box: [width, height] });
+    generateBattlefield({ planetCount: 4, box: [width, height] });
 
   const [{ planets, routes }, setBattlefield] = useState(
     regenerateBattlefield()
