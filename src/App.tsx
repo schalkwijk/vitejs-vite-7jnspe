@@ -39,7 +39,7 @@ const Planet = ({
                 radius={radius + 4}
                 x={position[0]}
                 y={position[1]}
-                dash={[10, 10, 10, 10, 10]}
+                dash={[10]}
                 {...props}
               />
             );
@@ -55,7 +55,7 @@ const App = () => {
   const height = window.innerHeight - 100;
   const stage = useRef(null);
   const regenerateBattlefield = () =>
-    generateBattlefield({ planetCount: 4, box: [width, height] });
+    generateBattlefield({ planetCount: 15, box: [width, height] });
 
   const [{ planets, routes }, setBattlefield] = useState(
     regenerateBattlefield()

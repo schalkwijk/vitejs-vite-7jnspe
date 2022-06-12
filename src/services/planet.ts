@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { getRandomInt } from '../util';
+import { distance, getRandomInt } from '../util';
 
 export type TPlanet = {
   id: string;
@@ -16,12 +16,6 @@ const atArmsLength = (
   planets: Array<TPlanet>,
   arm: number
 ) => {
-  const distance = (positionA: Position, positionB: Position) => {
-    return Math.sqrt(
-      Math.pow(positionA[0] - positionB[0], 2) +
-        Math.pow(positionA[1] - positionB[1], 2)
-    );
-  };
   return !planets.some((planet) => {
     const { radius, position } = positionAndRadius;
     return distance(position, planet.position) < radius + planet.radius + arm;

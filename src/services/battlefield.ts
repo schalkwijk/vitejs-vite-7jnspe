@@ -1,3 +1,6 @@
+import { orderBy } from 'lodash';
+
+import { distance } from '../util';
 import { generatePlanets } from './planet';
 
 export const generateBattlefield = ({
@@ -9,14 +12,38 @@ export const generateBattlefield = ({
 }) => {
   const planets = generatePlanets({ count: planetCount, box });
 
-  const routes = planets.reduce((routes, planet) => {
-    const otherPlanetIds = planets
-      .filter((otherPlanet) => otherPlanet.id != planet.id)
-      .map((otherPlanet) => otherPlanet.id);
+  const routes = {};
+  let [firstPlanet, ...outOfNetwork] = planets;
+  const inNetwork = [firstPlanet];
 
-    routes[planet.id] = otherPlanetIds;
-    return routes;
-  }, {} as Record<string, Array<string>>);
+  while (outOfNetwork.length) {
+    const distances = inNetwork.flatMap((inNetworkPlanet) => {
+      return outOfNetwork.map((outOfNextworkPlanet) => {
+        return {
+          distance: distance(
+            inNetworkPlanet.position,
+            outOfNextworkPlanet.position
+          ),
+          route: [inNetworkPlanet.id, outOfNextworkPlanet.id],
+        };
+      });
+    });
+
+    const closest = orderBy(distances, 'distance', 'asc')[2]!;
+
+    outOfNetwork = outOfNetwork.filter(
+      (outOfNetworkPlanet) => outOfNetworkPlanet.id !== closest.route[1]
+    );
+
+    inNetwork.push(planets.find((planet) => planet.id === closest.route[1])!);
+
+    routes[closest.route[0]] = [
+      ...(routes[closest.route[0]!] ?? []),
+      closest.route[1],
+    ];
+  }
+
+  console.log({ routes });
 
   return {
     planets,
