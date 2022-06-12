@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Stage, Layer, Circle, Line, Text } from 'react-konva';
+import { Stage, Layer, Circle, Line, Text, Group } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import { Spring, animated } from '@react-spring/konva';
 
@@ -13,15 +13,10 @@ const Planet = ({
   selected,
   onClick,
 }: TPlanet & { selected: boolean; onClick: () => void }) => {
+  const [locked, setLocked] = useState(false);
   return (
-    <>
-      <Circle
-        fill={color}
-        radius={radius}
-        x={position[0]}
-        y={position[1]}
-        onClick={onClick}
-      />
+    <Group onClick={onClick}>
+      <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
       <Text
         x={position[0] - radius - 1}
         y={position[1] - radius}
@@ -30,7 +25,6 @@ const Planet = ({
         verticalAlign="middle"
         width={radius * 2}
         height={radius * 2}
-        onClick={onClick}
       />
       {selected && (
         <Spring
@@ -56,7 +50,7 @@ const Planet = ({
           }}
         </Spring>
       )}
-    </>
+    </Group>
   );
 };
 
