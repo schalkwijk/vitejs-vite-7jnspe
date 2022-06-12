@@ -12,7 +12,7 @@ export const generateBattlefield = ({
 }) => {
   const planets = generatePlanets({ count: planetCount, box });
 
-  const routes = {};
+  const routes: Record<string, Array<string>> = {};
   let [firstPlanet, ...outOfNetwork] = planets;
   const inNetwork = [firstPlanet];
 
@@ -29,7 +29,7 @@ export const generateBattlefield = ({
       });
     });
 
-    const closest = orderBy(distances, 'distance', 'asc')[2]!;
+    const closest = orderBy(distances, 'distance', 'asc')[0]!;
 
     outOfNetwork = outOfNetwork.filter(
       (outOfNetworkPlanet) => outOfNetworkPlanet.id !== closest.route[1]
@@ -42,8 +42,6 @@ export const generateBattlefield = ({
       closest.route[1],
     ];
   }
-
-  console.log({ routes });
 
   return {
     planets,
