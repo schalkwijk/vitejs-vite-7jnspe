@@ -22,10 +22,38 @@ type TGame = {
   routes: Array<[TPlanet['id'], TPlanet['id']]>;
   box: TBox;
   planetCount: number;
+  tick: number;
 };
 
-const gameMachine = createMachine<TGame>({
-  context: { planets: [], routes: [], planetCount: 0, box: [0, 0] },
+type TEvents = {
+  type: 'reset' | 'tick';
+};
+
+const gameMachine = createMachine<TGame, TEvents>({
+  context: { planets: [], routes: [], planetCount: 0, box: [0, 0], tick: 0 },
+  initial: 'running',
+  states: {
+    running: {
+      invoke: {
+        src: (_conttext) => (send) => {
+          const interval = setInterval(() => {
+            send('tick');
+          }, 1000);
+
+          return () => {
+            clearInterval(interval);
+          };
+        },
+      },
+      on: {
+        tick: {
+          actions: assign((context) => {
+            return { tick: context.tick + 1 };
+          }),
+        },
+      },
+    },
+  },
   on: {
     reset: {
       actions: assign((context) => {
@@ -74,7 +102,7 @@ const generateBattlefield = ({
     routes.push([closest.route[0], closest.route[1]]);
   }
 
-  return { routes, planets, box, planetCount };
+  return { routes, planets, box, planetCount, tick: 0 };
 };
 
 export const useBattlefield = (

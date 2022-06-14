@@ -157,6 +157,7 @@ const App = () => {
                 key={`route-${firstPlanet!.id + secondPlanet!.id}`}
                 sourcePlanet={firstPlanet!}
                 targetPlanet={secondPlanet!}
+                tick={battlefield.context.tick}
               />
             </>
           );
