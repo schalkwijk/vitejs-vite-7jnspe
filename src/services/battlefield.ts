@@ -1,6 +1,6 @@
 import { useMachine } from '@xstate/react';
 import { orderBy } from 'lodash';
-import { createMachine } from 'xstate';
+import { createMachine, assign } from 'xstate';
 
 import { v4 as uuid } from 'uuid';
 import { distance, getRandomInt } from '../util';
@@ -12,20 +12,37 @@ export type TPlanet = {
   position: [number, number];
 };
 
+type PositionAndRadius = Pick<TPlanet, 'position' | 'radius'>;
+export type Position = TPlanet['position'];
+
+type TBox = [number, number];
+
 type TGame = {
   planets: Array<TPlanet>;
   routes: Array<[TPlanet['id'], TPlanet['id']]>;
+  box: TBox;
+  planetCount: number;
 };
 
 const gameMachine = createMachine<TGame>({
-  context: { planets: [], routes: [] },
+  context: { planets: [], routes: [], planetCount: 0, box: [0, 0] },
+  on: {
+    reset: {
+      actions: assign((context) => {
+        return {
+          planets: [],
+          routes: [],
+        };
+      }),
+    },
+  },
 });
 
-export const useBattlefield = ({
-  box,
+const generateBattlefield = ({
   planetCount,
+  box,
 }: {
-  box: [number, number];
+  box: TBox;
   planetCount: number;
 }) => {
   const planets = generatePlanets({ count: planetCount, box });
@@ -58,11 +75,14 @@ export const useBattlefield = ({
     routes.push([closest.route[0], closest.route[1]]);
   }
 
-  return useMachine(gameMachine, { context: { planets, routes } });
+  return { routes, planets };
 };
 
-type PositionAndRadius = Pick<TPlanet, 'position' | 'radius'>;
-export type Position = TPlanet['position'];
+export const useBattlefield = (
+  options: Parameters<typeof generateBattlefield>[0]
+) => {
+  return useMachine(gameMachine, { context: generateBattlefield(options) });
+};
 
 const atArmsLength = (
   positionAndRadius: PositionAndRadius,

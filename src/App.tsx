@@ -95,12 +95,13 @@ const App = () => {
   const width = window.innerWidth - 100;
   const height = window.innerHeight - 100;
   const stage = useRef(null);
-  const regenerateBattlefield = () => {};
 
   const [battlefield, triggerEvent] = useBattlefield({
     planetCount: 10,
     box: [width, height],
   });
+
+  const regenerateBattlefield = () => triggerEvent('reset');
 
   const planets = battlefield.context.planets;
   const routes = battlefield.context.routes;
