@@ -30,8 +30,7 @@ const gameMachine = createMachine<TGame>({
     reset: {
       actions: assign((context) => {
         return {
-          planets: [],
-          routes: [],
+          ...generateBattlefield(context),
         };
       }),
     },
@@ -44,7 +43,7 @@ const generateBattlefield = ({
 }: {
   box: TBox;
   planetCount: number;
-}) => {
+}): TGame => {
   const planets = generatePlanets({ count: planetCount, box });
 
   const routes: TGame['routes'] = [];
@@ -75,7 +74,7 @@ const generateBattlefield = ({
     routes.push([closest.route[0], closest.route[1]]);
   }
 
-  return { routes, planets };
+  return { routes, planets, box, planetCount };
 };
 
 export const useBattlefield = (
