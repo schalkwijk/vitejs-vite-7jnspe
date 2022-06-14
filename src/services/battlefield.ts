@@ -61,6 +61,8 @@ const gameMachine = createMachine<TGame, TEvents>({
           ...generateBattlefield(context),
         };
       }),
+      target: '.running',
+      internal: false,
     },
   },
 });
