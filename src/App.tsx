@@ -3,8 +3,7 @@ import { Stage, Layer, Circle, Line, Text, Group } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import { animated, useSpring } from '@react-spring/konva';
 
-import { generateBattlefield } from './services/battlefield';
-import { TPlanet } from './services/planet';
+import { useBattlefield, TPlanet } from './services/battlefield';
 
 const RouteStart = ({
   sourcePlanet,
@@ -96,12 +95,15 @@ const App = () => {
   const width = window.innerWidth - 100;
   const height = window.innerHeight - 100;
   const stage = useRef(null);
-  const regenerateBattlefield = () =>
-    generateBattlefield({ planetCount: 10, box: [width, height] });
+  const regenerateBattlefield = () => {};
 
-  const [{ planets, routes }, setBattlefield] = useState(
-    regenerateBattlefield()
-  );
+  const [battlefield, triggerEvent] = useBattlefield({
+    planetCount: 10,
+    box: [width, height],
+  });
+
+  const planets = battlefield.context.planets;
+  const routes = battlefield.context.routes;
 
   const [selectedPlanetId, setSelectedPlanetId] = useState<null | string>(null);
 
@@ -127,35 +129,36 @@ const App = () => {
         <Html>
           <button
             style={{ position: 'absolute', left: 10, top: -30 }}
-            onClick={() => setBattlefield(regenerateBattlefield())}
+            onClick={() => regenerateBattlefield()}
           >
             Refresh
           </button>
         </Html>
 
-        {Object.entries(routes).flatMap(([planetId, otherPlanetIds]) => {
-          const planet = planets.find((candidate) => candidate.id === planetId);
-          return otherPlanetIds.map((otherPlanetId) => {
-            const otherPlanet = planets.find(
-              (candidate) => candidate.id === otherPlanetId
-            );
+        {routes.map(([firstPlanetId, secondPlanetId]) => {
+          const firstPlanet = planets.find(
+            (candidate) => candidate.id === firstPlanetId
+          );
 
-            return (
-              <>
-                <Line
-                  key={`line-${planet!.id + otherPlanet!.id}`}
-                  points={[...planet!.position, ...otherPlanet!.position]}
-                  strokeWidth={2}
-                  stroke={gradientCreator(planet!, otherPlanet!)}
-                />
-                <RouteStart
-                  key={`route-${planet!.id + otherPlanet!.id}`}
-                  sourcePlanet={planet!}
-                  targetPlanet={otherPlanet!}
-                />
-              </>
-            );
-          });
+          const secondPlanet = planets.find(
+            (candidate) => candidate.id === secondPlanetId
+          );
+
+          return (
+            <>
+              <Line
+                key={`line-${firstPlanet!.id + secondPlanet!.id}`}
+                points={[...firstPlanet!.position, ...secondPlanet!.position]}
+                strokeWidth={2}
+                stroke={gradientCreator(firstPlanet!, secondPlanet!)}
+              />
+              <RouteStart
+                key={`route-${firstPlanet!.id + secondPlanet!.id}`}
+                sourcePlanet={firstPlanet!}
+                targetPlanet={secondPlanet!}
+              />
+            </>
+          );
         })}
 
         {planets.map((planet) => {
