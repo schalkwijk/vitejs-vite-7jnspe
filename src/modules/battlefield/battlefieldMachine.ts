@@ -27,7 +27,7 @@ export const battlefieldMachine = createMachine<TBattlefield, TEvents>({
         planets: ({ planets }) =>
           planets.map((planet) => ({
             ...planet,
-            ref: spawn(createPlanetMachine(planet), `planet-${planet.id}`),
+            machine: spawn(createPlanetMachine(planet), `planet-${planet.id}`),
           })),
       }),
       invoke: {
@@ -49,7 +49,7 @@ export const battlefieldMachine = createMachine<TBattlefield, TEvents>({
             }),
             pure((context) => {
               return context.planets.map((planet) => {
-                return send({ type: 'tick' }, { to: planet.ref });
+                return send({ type: 'tick' }, { to: planet.machine });
               });
             }),
           ],
