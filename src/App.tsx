@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import { Stage, Layer, Circle, Line, Text, Group } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import { animated, useSpring } from '@react-spring/konva';
 
-import { useBattlefield, TPlanet } from './services/battlefield';
+import { useBattlefield } from './modules/battlefield/battlefield';
+import { TPlanet } from './modules/planet/planet';
 
 const RouteStart = ({
   sourcePlanet,
@@ -55,7 +56,6 @@ const Planet = ({
   selected,
   onClick,
 }: TPlanet & { selected: boolean; onClick: () => void }) => {
-  const [locked, setLocked] = useState(false);
   const styles = useSpring({
     from: { rotation: 0 },
     to: {
@@ -64,6 +64,7 @@ const Planet = ({
     config: { duration: 2500 },
     loop: true,
   });
+
   return (
     <Group onClick={onClick}>
       <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
@@ -146,20 +147,17 @@ const App = () => {
           );
 
           return (
-            <>
+            <Fragment key={`line-${firstPlanet!.id + secondPlanet!.id}`}>
               <Line
-                key={`line-${firstPlanet!.id + secondPlanet!.id}`}
                 points={[...firstPlanet!.position, ...secondPlanet!.position]}
                 strokeWidth={2}
                 stroke={gradientCreator(firstPlanet!, secondPlanet!)}
               />
               <RouteStart
-                key={`route-${firstPlanet!.id + secondPlanet!.id}`}
                 sourcePlanet={firstPlanet!}
                 targetPlanet={secondPlanet!}
-                tick={battlefield.context.tick}
               />
-            </>
+            </Fragment>
           );
         })}
 

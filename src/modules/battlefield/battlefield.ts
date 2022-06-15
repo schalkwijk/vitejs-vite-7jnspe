@@ -1,82 +1,21 @@
 import { useMachine } from '@xstate/react';
 import { orderBy } from 'lodash';
-import { createMachine, assign } from 'xstate';
 
 import { v4 as uuid } from 'uuid';
 import { distance, getRandomInt } from '../util';
+import { PositionAndRadius, TPlanet } from '../planet/planet';
+import { TBox, TBattlefield, battlefieldMachine } from './battlefieldMachine';
 
-export type TPlanet = {
-  id: string;
-  color: string;
-  radius: number;
-  position: [number, number];
-};
-
-type PositionAndRadius = Pick<TPlanet, 'position' | 'radius'>;
-export type Position = TPlanet['position'];
-
-type TBox = [number, number];
-
-type TGame = {
-  planets: Array<TPlanet>;
-  routes: Array<[TPlanet['id'], TPlanet['id']]>;
-  box: TBox;
-  planetCount: number;
-  tick: number;
-};
-
-type TEvents = {
-  type: 'reset' | 'tick';
-};
-
-const gameMachine = createMachine<TGame, TEvents>({
-  context: { planets: [], routes: [], planetCount: 0, box: [0, 0], tick: 0 },
-  initial: 'running',
-  states: {
-    running: {
-      invoke: {
-        src: (_conttext) => (send) => {
-          const interval = setInterval(() => {
-            send('tick');
-          }, 1000);
-
-          return () => {
-            clearInterval(interval);
-          };
-        },
-      },
-      on: {
-        tick: {
-          actions: assign((context) => {
-            return { tick: context.tick + 1 };
-          }),
-        },
-      },
-    },
-  },
-  on: {
-    reset: {
-      actions: assign((context) => {
-        return {
-          ...generateBattlefield(context),
-        };
-      }),
-      target: '.running',
-      internal: false,
-    },
-  },
-});
-
-const generateBattlefield = ({
+export const generateBattlefield = ({
   planetCount,
   box,
 }: {
   box: TBox;
   planetCount: number;
-}): TGame => {
+}): TBattlefield => {
   const planets = generatePlanets({ count: planetCount, box });
 
-  const routes: TGame['routes'] = [];
+  const routes: TBattlefield['routes'] = [];
   let [firstPlanet, ...outOfNetwork] = planets;
   const inNetwork = [firstPlanet];
 
@@ -110,7 +49,9 @@ const generateBattlefield = ({
 export const useBattlefield = (
   options: Parameters<typeof generateBattlefield>[0]
 ) => {
-  return useMachine(gameMachine, { context: generateBattlefield(options) });
+  return useMachine(battlefieldMachine, {
+    context: generateBattlefield(options),
+  });
 };
 
 const atArmsLength = (
@@ -124,7 +65,7 @@ const atArmsLength = (
   });
 };
 
-export const generatePlanets = ({
+const generatePlanets = ({
   count,
   box,
 }: {
