@@ -57,6 +57,7 @@ const Planet = ({
   onClick,
   ...rest
 }: TPlanet & { selected: boolean; onClick: () => void }) => {
+  const tick = rest?.machine?.getSnapshot?.().context?.tick;
   const styles = useSpring({
     from: { rotation: 0 },
     to: {
@@ -72,8 +73,8 @@ const Planet = ({
       <Text
         x={position[0] - radius - 1}
         y={position[1] - radius}
-        text={rest.tick}
         align="center"
+        text={tick}
         verticalAlign="middle"
         width={radius * 2}
         height={radius * 2}
@@ -165,8 +166,8 @@ const App = () => {
         {planets.map((planet) => {
           return (
             <Planet
-              key={planet.machine.id}
-              {...planet.machine}
+              key={planet.id}
+              {...planet}
               onClick={() => setSelectedPlanetId(planet.id)}
               selected={planet.id === selectedPlanetId}
             />
