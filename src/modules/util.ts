@@ -1,4 +1,4 @@
-import { Position } from './services/planet';
+import { Position } from "./services/planet";
 
 export const distance = (positionA: Position, positionB: Position) => {
   return Math.sqrt(

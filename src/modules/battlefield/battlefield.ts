@@ -1,10 +1,10 @@
-import { useMachine } from '@xstate/react';
-import { orderBy } from 'lodash';
+import { useMachine } from "@xstate/react";
+import { orderBy } from "lodash";
 
-import { v4 as uuid } from 'uuid';
-import { distance, getRandomInt } from '../util';
-import { PositionAndRadius, TPlanet } from '../planet/planet';
-import { TBox, TBattlefield, battlefieldMachine } from './battlefieldMachine';
+import { v4 as uuid } from "uuid";
+import { distance, getRandomInt } from "../util";
+import { PositionAndRadius, TPlanet } from "../planet/planet";
+import { TBox, TBattlefield, createBattlefieldMachine } from "./battlefieldMachine";
 
 export const generateBattlefield = ({
   planetCount,
@@ -15,7 +15,7 @@ export const generateBattlefield = ({
 }): TBattlefield => {
   const planets = generatePlanets({ count: planetCount, box });
 
-  const routes: TBattlefield['routes'] = [];
+  const routes: TBattlefield["routes"] = [];
   let [firstPlanet, ...outOfNetwork] = planets;
   const inNetwork = [firstPlanet];
 
@@ -32,7 +32,7 @@ export const generateBattlefield = ({
       });
     });
 
-    const closest = orderBy(distances, 'distance', 'asc')[0]!;
+    const closest = orderBy(distances, "distance", "asc")[0]!;
 
     outOfNetwork = outOfNetwork.filter(
       (outOfNetworkPlanet) => outOfNetworkPlanet.id !== closest.route[1]
@@ -43,15 +43,15 @@ export const generateBattlefield = ({
     routes.push([closest.route[0], closest.route[1]]);
   }
 
-  return { routes, planets, box, planetCount, tick: 0 };
+  return { routes, planets: planets as any, box, planetCount, tick: 0 };
 };
 
 export const useBattlefield = (
   options: Parameters<typeof generateBattlefield>[0]
 ) => {
-  return useMachine(battlefieldMachine, {
-    context: generateBattlefield(options),
-  });
+  return useMachine(
+    createBattlefieldMachine(generateBattlefield(options))
+  );
 };
 
 const atArmsLength = (
@@ -72,7 +72,7 @@ const generatePlanets = ({
   count: number;
   box: [number, number];
 }): Array<TPlanet> => {
-  const colors = ['#7FDBFF', '#39CCCC', '#FF851B', '#FFFFFF'];
+  const colors = ["#7FDBFF", "#39CCCC", "#FF851B", "#FFFFFF"];
   const planets: Array<TPlanet> = [];
 
   const getPositionAndRadius = (): PositionAndRadius => {

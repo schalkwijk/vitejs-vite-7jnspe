@@ -1,10 +1,10 @@
-import { Fragment, useRef, useState } from 'react';
-import { Stage, Layer, Circle, Line, Text, Group } from 'react-konva';
-import { Html } from 'react-konva-utils';
-import { animated, useSpring } from '@react-spring/konva';
+import { Fragment, useRef, useState } from "react";
+import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
+import { Html } from "react-konva-utils";
+import { animated, useSpring } from "@react-spring/konva";
 
-import { useBattlefield } from './modules/battlefield/battlefield';
-import { TPlanet } from './modules/planet/planet';
+import { useBattlefield } from "./modules/battlefield/battlefield";
+import { TPlanet } from "./modules/planet/planet";
 
 const RouteStart = ({
   sourcePlanet,
@@ -55,9 +55,8 @@ const Planet = ({
   position,
   selected,
   onClick,
-  ...rest
+  tick,
 }: TPlanet & { selected: boolean; onClick: () => void }) => {
-  const tick = rest?.machine?.getSnapshot?.().context?.tick;
   const styles = useSpring({
     from: { rotation: 0 },
     to: {
@@ -74,7 +73,7 @@ const Planet = ({
         x={position[0] - radius - 1}
         y={position[1] - radius}
         align="center"
-        text={tick}
+        text={tick.toString()}
         verticalAlign="middle"
         width={radius * 2}
         height={radius * 2}
@@ -104,7 +103,7 @@ const App = () => {
     box: [width, height],
   });
 
-  const regenerateBattlefield = () => triggerEvent('reset');
+  const regenerateBattlefield = () => triggerEvent("reset");
 
   const planets = battlefield.context.planets;
   const routes = battlefield.context.routes;
@@ -115,7 +114,7 @@ const App = () => {
     const gradient: any =
       stage.current &&
       (stage.current as any).bufferCanvas._canvas
-        .getContext('2d')
+        .getContext("2d")
         // gradients are scoped globally since we're pulling the context off the total canvas
         .createLinearGradient(...[...planetA.position, ...planetB.position]);
 
@@ -132,7 +131,7 @@ const App = () => {
       <Layer>
         <Html>
           <button
-            style={{ position: 'absolute', left: 10, top: -30 }}
+            style={{ position: "absolute", left: 10, top: -30 }}
             onClick={() => regenerateBattlefield()}
           >
             Refresh
