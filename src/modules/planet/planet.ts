@@ -4,6 +4,7 @@ export type TPlanet = {
   radius: number;
   position: [number, number];
   tick: number;
+  selected: boolean;
 };
 
 export type PositionAndRadius = Pick<TPlanet, "position" | "radius">;

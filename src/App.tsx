@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useRef } from "react";
 import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 import { animated, useSpring } from "@react-spring/konva";
@@ -56,7 +56,7 @@ const Planet = ({
   selected,
   onClick,
   tick,
-}: TPlanet & { selected: boolean; onClick: () => void }) => {
+}: TPlanet & { onClick: () => void }) => {
   const styles = useSpring({
     from: { rotation: 0 },
     to: {
@@ -107,8 +107,6 @@ const App = () => {
 
   const planets = battlefield.context.planets;
   const routes = battlefield.context.routes;
-
-  const [selectedPlanetId, setSelectedPlanetId] = useState<null | string>(null);
 
   const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
     const gradient: any =
@@ -167,8 +165,7 @@ const App = () => {
             <Planet
               key={planet.id}
               {...planet}
-              onClick={() => setSelectedPlanetId(planet.id)}
-              selected={planet.id === selectedPlanetId}
+              onClick={() => planet.machine.send("select")}
             />
           );
         })}

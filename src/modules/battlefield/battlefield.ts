@@ -4,7 +4,11 @@ import { orderBy } from "lodash";
 import { v4 as uuid } from "uuid";
 import { distance, getRandomInt } from "../util";
 import { PositionAndRadius, TPlanet } from "../planet/planet";
-import { TBox, TBattlefield, createBattlefieldMachine } from "./battlefieldMachine";
+import {
+  TBox,
+  TBattlefield,
+  createBattlefieldMachine,
+} from "./battlefieldMachine";
 
 export const generateBattlefield = ({
   planetCount,
@@ -49,9 +53,7 @@ export const generateBattlefield = ({
 export const useBattlefield = (
   options: Parameters<typeof generateBattlefield>[0]
 ) => {
-  return useMachine(
-    createBattlefieldMachine(generateBattlefield(options))
-  );
+  return useMachine(createBattlefieldMachine(generateBattlefield(options)));
 };
 
 const atArmsLength = (
