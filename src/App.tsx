@@ -84,13 +84,15 @@ const App = () => {
       width={width}
       height={height}
       ref={stage}
-      draggable={true}
-      onDragStart={(target) => {
-        (stage.current as any).stopDrag();
+      onMouseDown={({ target }: { target: any }) => {
+        if (target?.parent) {
+          mouse.send("mouseDown", { target: target.parent.attrs });
+        }
       }}
       onMouseUp={({ target }) => {
-        console.log({ target });
-        mouse.send("click", { target: (target as any).parent.attrs });
+        if (target?.parent) {
+          mouse.send("mouseUp", { target: target.parent.attrs });
+        }
       }}
     >
       <Layer>

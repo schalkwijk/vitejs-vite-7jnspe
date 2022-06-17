@@ -14,17 +14,36 @@ export type TBattlefield = {
   tick: number;
 };
 
+type TMouse = { activePlanetId: string | null };
+
 const createMouseMachine = () => {
-  return createMachine(
+  return createMachine<TMouse>(
     {
+      context: { activePlanetId: null },
       initial: "idle",
       states: {
         idle: {
           on: {
-            click: {
+            mouseDown: {
+              target: "waitingOnMouseUp",
               actions: choose([
                 {
                   cond: "isPlanetTarget",
+                  actions: assign({
+                    activePlanetId: (_, event: any) => event.target.id,
+                  }),
+                }, // TODO: remove any
+              ]),
+            },
+          },
+        },
+        waitingOnMouseUp: {
+          on: {
+            mouseUp: {
+              target: "idle",
+              actions: choose([
+                {
+                  cond: "activePlanetIsSameAsTargetPlanet",
                   actions: sendParent((_, event: any) => ({
                     // TODO: remove any
                     type: "planet.clicked",
@@ -39,7 +58,13 @@ const createMouseMachine = () => {
     },
     {
       guards: {
-        isPlanetTarget: (_context, event) => {
+        activePlanetIsSameAsTargetPlanet: (context, event) => {
+          return (
+            event.target?.type === "planet" &&
+            context.activePlanetId === event.target.id
+          );
+        },
+        isPlanetTarget: (context, event) => {
           return event.target?.type === "planet";
         },
       },
