@@ -27,10 +27,7 @@ export const generateBattlefield = ({
     const distances = inNetwork.flatMap((inNetworkPlanet) => {
       return outOfNetwork.map((outOfNextworkPlanet) => {
         return {
-          distance: distance(
-            inNetworkPlanet.position,
-            outOfNextworkPlanet.position
-          ),
+          distance: distance(inNetworkPlanet, outOfNextworkPlanet),
           route: [inNetworkPlanet.id, outOfNextworkPlanet.id],
         };
       });
@@ -63,7 +60,7 @@ const atArmsLength = (
 ) => {
   return !planets.some((planet) => {
     const { radius, position } = positionAndRadius;
-    return distance(position, planet.position) < radius + planet.radius + arm;
+    return distance({ position }, planet) < radius + planet.radius + arm;
   });
 };
 

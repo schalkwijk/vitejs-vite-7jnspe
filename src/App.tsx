@@ -1,11 +1,11 @@
 import { Fragment, useRef } from "react";
-import { Stage, Layer, Circle, Line, Text, Group } from "react-konva";
+import { Stage, Layer, Line } from "react-konva";
 import { Html } from "react-konva-utils";
 import { animated, useSpring } from "@react-spring/konva";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
-import { TPlanet } from "./modules/planet/planet";
-import { inspect } from "@xstate/inspect";
+import { angleBetweenPlanets, TPlanet } from "./modules/planet/planet";
+import { Planet } from "./modules/planet/planetComponent";
 
 const RouteStart = ({
   sourcePlanet,
@@ -14,16 +14,11 @@ const RouteStart = ({
   sourcePlanet: TPlanet;
   targetPlanet: TPlanet;
 }) => {
-  const x1 = sourcePlanet.position[0];
-  const y1 = sourcePlanet.position[1];
-  const x2 = targetPlanet.position[0];
-  const y2 = targetPlanet.position[1];
-  const theta = Math.atan2(y1 - y2, x2 - x1);
-
+  const { radians, degrees } = angleBetweenPlanets({ sourcePlanet, targetPlanet })
   const finalX =
-    Math.cos(theta) * sourcePlanet.radius + sourcePlanet.position[0];
+    Math.cos(radians) * sourcePlanet.radius + sourcePlanet.position[0];
   const finalY = // -1 since the y axis increases when you go down
-    -1 * Math.sin(theta) * sourcePlanet.radius + sourcePlanet.position[1];
+    -1 * Math.sin(radians) * sourcePlanet.radius + sourcePlanet.position[1];
 
   const motion = useSpring({
     from: { x: finalX, y: finalY, radius: sourcePlanet.radius },
@@ -41,56 +36,11 @@ const RouteStart = ({
       fill={sourcePlanet.color}
       {...motion}
       opacity={0.7}
-      // need to convert from radians to degrees
       // also, the 90 is here since konva sees rotations
       // as angles clockwise from the y axis, while regular
       // math sees it as angles counter-clockwise from the x axis
-      rotation={90 - theta * (180 / Math.PI)}
+      rotation={90 - degrees}
     />
-  );
-};
-
-const Planet = ({
-  color,
-  radius,
-  position,
-  selected,
-  onClick,
-  tick,
-}: TPlanet & { onClick: () => void }) => {
-  const styles = useSpring({
-    from: { rotation: 0 },
-    to: {
-      rotation: 360,
-    },
-    config: { duration: 2500 },
-    loop: true,
-  });
-
-  return (
-    <Group onClick={onClick}>
-      <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
-      <Text
-        x={position[0] - radius - 1}
-        y={position[1] - radius}
-        align="center"
-        text={tick.toString()}
-        verticalAlign="middle"
-        width={radius * 2}
-        height={radius * 2}
-      />
-      {selected && (
-        <animated.Circle
-          stroke={color}
-          strokeWidth={2}
-          radius={radius + 4}
-          x={position[0]}
-          y={position[1]}
-          dash={[10]}
-          {...styles}
-        />
-      )}
-    </Group>
   );
 };
 

@@ -1,6 +1,11 @@
-import { Position } from "./services/planet";
+import { TPlanet } from "./planet/planet";
 
-export const distance = (positionA: Position, positionB: Position) => {
+type JustPosition = Pick<TPlanet, "position">;
+
+export const distance = (
+  { position: positionA }: JustPosition,
+  { position: positionB }: JustPosition
+) => {
   return Math.sqrt(
     Math.pow(positionA[0] - positionB[0], 2) +
       Math.pow(positionA[1] - positionB[1], 2)
