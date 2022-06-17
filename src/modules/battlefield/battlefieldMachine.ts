@@ -1,5 +1,5 @@
 import { createMachine, assign, spawn, send } from "xstate";
-import { pure, choose, sendParent } from "xstate/lib/actions";
+import { pure, choose, sendParent, log } from "xstate/lib/actions";
 
 import { TPlanet } from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
@@ -50,6 +50,15 @@ const createMouseMachine = () => {
                     planetId: event.target.id,
                   })),
                 },
+                {
+                  cond: "activePlanetIsDifferentThanTargetPlanet",
+                  actions: sendParent((context, event: any) => ({
+                    // TODO: remove any
+                    type: "planet.linked",
+                    sourcePlanetId: context.activePlanetId,
+                    targetPlanetId: event.target.id,
+                  })),
+                },
               ]),
             },
           },
@@ -64,7 +73,13 @@ const createMouseMachine = () => {
             context.activePlanetId === event.target.id
           );
         },
-        isPlanetTarget: (context, event) => {
+        activePlanetIsDifferentThanTargetPlanet: (context, event) => {
+          return (
+            event.target?.type === "planet" &&
+            context.activePlanetId !== event.target.id
+          );
+        },
+        isPlanetTarget: (_context, event) => {
           return event.target?.type === "planet";
         },
       },
@@ -127,6 +142,9 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         }),
         target: ".running",
         internal: false,
+      },
+      "planet.linked": {
+        actions: log(),
       },
       "planet.clicked": {
         actions: pure((context, event) => {
