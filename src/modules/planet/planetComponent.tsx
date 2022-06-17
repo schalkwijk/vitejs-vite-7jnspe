@@ -3,14 +3,7 @@ import { animated, useSpring } from "@react-spring/konva";
 
 import { TPlanet } from "./planet";
 
-export const Planet = ({
-  color,
-  radius,
-  position,
-  selected,
-  onClick,
-  tick,
-}: TPlanet & { onClick: () => void }) => {
+export const Planet = ({ color, radius, position, selected, id }: TPlanet) => {
   const styles = useSpring({
     from: { rotation: 0 },
     to: {
@@ -21,17 +14,8 @@ export const Planet = ({
   });
 
   return (
-    <Group onClick={onClick}>
+    <Group id={id} key={id} type="planet">
       <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
-      <Text
-        x={position[0] - radius - 1}
-        y={position[1] - radius}
-        align="center"
-        text={tick.toString()}
-        verticalAlign="middle"
-        width={radius * 2}
-        height={radius * 2}
-      />
       {selected && (
         <animated.Circle
           stroke={color}

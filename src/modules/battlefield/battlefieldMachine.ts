@@ -1,5 +1,5 @@
 import { createMachine, assign, spawn, send } from "xstate";
-import { pure } from "xstate/lib/actions";
+import { pure, choose, sendParent } from "xstate/lib/actions";
 
 import { TPlanet } from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
@@ -14,13 +14,49 @@ export type TBattlefield = {
   tick: number;
 };
 
+const createMouseMachine = () => {
+  return createMachine(
+    {
+      initial: "idle",
+      states: {
+        idle: {
+          on: {
+            click: {
+              actions: choose([
+                {
+                  cond: "isPlanetTarget",
+                  actions: sendParent((_, event: any) => ({
+                    // TODO: remove any
+                    type: "planet.clicked",
+                    planetId: event.target.id,
+                  })),
+                },
+              ]),
+            },
+          },
+        },
+      },
+    },
+    {
+      guards: {
+        isPlanetTarget: (_context, event) => {
+          return event.target?.type === "planet";
+        },
+      },
+    }
+  );
+};
+
 export const createBattlefieldMachine = (battlefield: TBattlefield) => {
-  return createMachine<TBattlefield>({
-    context: battlefield,
+  return createMachine<TBattlefield & { mouse: any }>({
+    context: { ...battlefield, mouse: null },
     initial: "running",
     states: {
       running: {
         entry: assign({
+          mouse: (_context) => {
+            return spawn(createMouseMachine(), "mouse");
+          },
           planets: ({ planets }) =>
             planets.map((planet) => ({
               ...planet,
@@ -67,10 +103,10 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         target: ".running",
         internal: false,
       },
-      "planet.select": {
+      "planet.clicked": {
         actions: pure((context, event) => {
           return context.planets.map((planet) => {
-            return planet.id === event.planet.id
+            return planet.id === event.planetId
               ? send({ type: "select" }, { to: planet.machine })
               : send({ type: "deselect" }, { to: planet.machine });
           });

@@ -1,7 +1,8 @@
 import { useMachine } from "@xstate/react";
 import { orderBy } from "lodash";
-
+import { useMemo } from "react";
 import { v4 as uuid } from "uuid";
+
 import { distance, getRandomInt } from "../util";
 import { PositionAndRadius, TPlanet } from "../planet/planet";
 import {
@@ -9,7 +10,6 @@ import {
   TBattlefield,
   createBattlefieldMachine,
 } from "./battlefieldMachine";
-import { useMemo } from "react";
 
 export const generateBattlefield = ({
   planetCount,
@@ -53,7 +53,7 @@ export const useBattlefield = (
 ) => {
   const machine = useMemo(() => {
     return createBattlefieldMachine(generateBattlefield(options));
-  }, [options.box[0], options.box[1], options.planetCount]);
+  }, []);
 
   return useMachine(machine);
 };

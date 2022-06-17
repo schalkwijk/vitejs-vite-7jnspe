@@ -61,6 +61,7 @@ const App = () => {
 
   const planets = battlefield.context.planets;
   const routes = battlefield.context.routes;
+  const mouse = battlefield.context.mouse;
 
   const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
     const gradient: any =
@@ -79,7 +80,19 @@ const App = () => {
   };
 
   return (
-    <Stage width={width} height={height} ref={stage}>
+    <Stage
+      width={width}
+      height={height}
+      ref={stage}
+      draggable={true}
+      onDragStart={(target) => {
+        (stage.current as any).stopDrag();
+      }}
+      onMouseUp={({ target }) => {
+        console.log({ target });
+        mouse.send("click", { target: (target as any).parent.attrs });
+      }}
+    >
       <Layer>
         <Html>
           <button
@@ -115,13 +128,7 @@ const App = () => {
         })}
 
         {planets.map((planet) => {
-          return (
-            <Planet
-              key={planet.id}
-              {...planet}
-              onClick={() => triggerEvent("planet.select", { planet })}
-            />
-          );
+          return <Planet key={planet.id} {...planet} />;
         })}
       </Layer>
     </Stage>
