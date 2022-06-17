@@ -9,6 +9,7 @@ import {
   TBattlefield,
   createBattlefieldMachine,
 } from "./battlefieldMachine";
+import { useMemo } from "react";
 
 export const generateBattlefield = ({
   planetCount,
@@ -50,7 +51,11 @@ export const generateBattlefield = ({
 export const useBattlefield = (
   options: Parameters<typeof generateBattlefield>[0]
 ) => {
-  return useMachine(createBattlefieldMachine(generateBattlefield(options)));
+  const machine = useMemo(() => {
+    return createBattlefieldMachine(generateBattlefield(options));
+  }, [options.box[0], options.box[1], options.planetCount]);
+
+  return useMachine(machine);
 };
 
 const atArmsLength = (
@@ -90,6 +95,7 @@ const generatePlanets = ({
     planets.push({
       color: colors[getRandomInt(0, 3)],
       id: uuid(),
+      tick: 0,
       ...positionAndRadius,
     });
   }

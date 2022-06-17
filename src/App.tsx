@@ -14,7 +14,10 @@ const RouteStart = ({
   sourcePlanet: TPlanet;
   targetPlanet: TPlanet;
 }) => {
-  const { radians, degrees } = angleBetweenPlanets({ sourcePlanet, targetPlanet })
+  const { radians, degrees } = angleBetweenPlanets({
+    sourcePlanet,
+    targetPlanet,
+  });
   const finalX =
     Math.cos(radians) * sourcePlanet.radius + sourcePlanet.position[0];
   const finalY = // -1 since the y axis increases when you go down
