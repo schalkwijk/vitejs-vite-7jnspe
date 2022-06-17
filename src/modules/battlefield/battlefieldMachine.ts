@@ -68,14 +68,12 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         internal: false,
       },
       "planet.select": {
-        actions: assign({
-          planets: (context, event) => {
-            return context.planets.map((planet) => {
-              return planet.id === event.planet.id
-                ? { ...planet, ...event.planet }
-                : { ...planet, selected: false };
-            });
-          },
+        actions: pure((context, event) => {
+          return context.planets.map((planet) => {
+            return planet.id === event.planet.id
+              ? send({ type: "select" }, { to: planet.machine })
+              : send({ type: "deselect" }, { to: planet.machine });
+          });
         }),
       },
       "planet.commit": {

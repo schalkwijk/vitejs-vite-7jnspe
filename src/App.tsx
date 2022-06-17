@@ -5,6 +5,7 @@ import { animated, useSpring } from "@react-spring/konva";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
 import { TPlanet } from "./modules/planet/planet";
+import { inspect } from "@xstate/inspect";
 
 const RouteStart = ({
   sourcePlanet,
@@ -165,7 +166,7 @@ const App = () => {
             <Planet
               key={planet.id}
               {...planet}
-              onClick={() => planet.machine.send("select")}
+              onClick={() => triggerEvent("planet.select", { planet })}
             />
           );
         })}

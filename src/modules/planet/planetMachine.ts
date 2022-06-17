@@ -3,7 +3,7 @@ import { createMachine, assign, sendParent } from "xstate";
 import { TPlanet } from "./planet";
 
 type TEvents = {
-  type: "tick" | "select";
+  type: "tick" | "select" | "deselect";
 };
 
 export const createPlanetMachine = (planet: TPlanet) => {
@@ -35,7 +35,15 @@ export const createPlanetMachine = (planet: TPlanet) => {
             assign({
               selected: (_context) => true,
             }),
-            "select",
+            "commit",
+          ],
+        },
+        deselect: {
+          actions: [
+            assign({
+              selected: (_context) => false,
+            }),
+            "commit",
           ],
         },
       },
@@ -45,12 +53,6 @@ export const createPlanetMachine = (planet: TPlanet) => {
         commit: sendParent((context) => {
           return {
             type: "planet.commit",
-            planet: context,
-          };
-        }),
-        select: sendParent((context) => {
-          return {
-            type: "planet.select",
             planet: context,
           };
         }),
