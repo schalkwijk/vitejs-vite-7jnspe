@@ -1,51 +1,10 @@
-import { Fragment, useRef } from "react";
-import { Stage, Layer, Line, Group } from "react-konva";
+import { useRef } from "react";
+import { Stage, Layer, Line } from "react-konva";
 import { Html } from "react-konva-utils";
-import { animated, useSpring } from "@react-spring/konva";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
-import { angleBetweenPlanets, TPlanet } from "./modules/planet/planet";
-import { Planet, RouteIndicator } from "./modules/planet/planetComponent";
-
-const RouteStart = ({
-  sourcePlanet,
-  targetPlanet,
-}: {
-  sourcePlanet: TPlanet;
-  targetPlanet: TPlanet;
-}) => {
-  const { radians, degrees } = angleBetweenPlanets({
-    sourcePlanet,
-    targetPlanet,
-  });
-  const finalX =
-    Math.cos(radians) * sourcePlanet.radius + sourcePlanet.position[0];
-  const finalY = // -1 since the y axis increases when you go down
-    -1 * Math.sin(radians) * sourcePlanet.radius + sourcePlanet.position[1];
-
-  const motion = useSpring({
-    from: { x: finalX, y: finalY, radius: sourcePlanet.radius },
-    to: {
-      x: targetPlanet.position[0],
-      y: targetPlanet.position[1],
-      radius: targetPlanet.radius,
-    },
-    config: { duration: 2500 },
-  });
-
-  return (
-    <animated.RegularPolygon
-      sides={3}
-      fill={sourcePlanet.color}
-      {...motion}
-      opacity={0.7}
-      // also, the 90 is here since konva sees rotations
-      // as angles clockwise from the y axis, while regular
-      // math sees it as angles counter-clockwise from the x axis
-      rotation={90 - degrees}
-    />
-  );
-};
+import { TPlanet } from "./modules/planet/planet";
+import { Planets } from "./modules/planet/planetComponent";
 
 const App = () => {
   const width = window.innerWidth - 100;
@@ -115,41 +74,16 @@ const App = () => {
           );
 
           return (
-            <Fragment key={`line-${firstPlanet!.id + secondPlanet!.id}`}>
-              <Line
-                points={[...firstPlanet!.position, ...secondPlanet!.position]}
-                strokeWidth={2}
-                stroke={gradientCreator(firstPlanet!, secondPlanet!)}
-              />
-              <RouteStart
-                sourcePlanet={firstPlanet!}
-                targetPlanet={secondPlanet!}
-              />
-            </Fragment>
+            <Line
+              key={`line-${firstPlanet!.id + secondPlanet!.id}`}
+              points={[...firstPlanet!.position, ...secondPlanet!.position]}
+              strokeWidth={2}
+              stroke={gradientCreator(firstPlanet!, secondPlanet!)}
+            />
           );
         })}
 
-        {planets.map((planet) => {
-          const groupKey = planet.id + "-with-routes";
-          return (
-            <Group key={groupKey}>
-              <Planet {...planet} />
-              {planet.routes.map(({ destination }) => {
-                const targetPlanet = planets.find(
-                  (planet) => planet.id === destination
-                )!;
-                const key = planet.id + "-" + targetPlanet.id;
-                return (
-                  <RouteIndicator
-                    key={key}
-                    sourcePlanet={planet}
-                    targetPlanet={targetPlanet}
-                  />
-                );
-              })}
-            </Group>
-          );
-        })}
+        <Planets planets={planets} />
       </Layer>
     </Stage>
   );

@@ -2,6 +2,7 @@ import { Circle, RegularPolygon, Group } from "react-konva";
 import { animated, useSpring } from "@react-spring/konva";
 
 import { angleBetweenPlanets, TPlanet } from "./planet";
+import { Fragment } from "react";
 
 export const Planet = ({ color, radius, position, selected, id }: TPlanet) => {
   const styles = useSpring({
@@ -14,7 +15,7 @@ export const Planet = ({ color, radius, position, selected, id }: TPlanet) => {
   });
 
   return (
-    <Group id={id} key={id} type="planet">
+    <Group id={id} type="planet">
       <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
       {selected && (
         <animated.Circle
@@ -60,5 +61,31 @@ export const RouteIndicator = ({
       // math sees it as angles counter-clockwise from the x axis
       rotation={90 - degrees}
     />
+  );
+};
+
+export const Planets = ({ planets }: { planets: Array<TPlanet> }) => {
+  return (
+    <>
+      {planets.map((planet) => {
+        return (
+          <Fragment key={planet.id}>
+            <Planet {...planet} />
+            {planet.routes.map(({ destination }) => {
+              const targetPlanet = planets.find(
+                (planet) => planet.id === destination
+              )!;
+              return (
+                <RouteIndicator
+                  key={`${planet.id}-${targetPlanet.id}`}
+                  sourcePlanet={planet}
+                  targetPlanet={targetPlanet}
+                />
+              );
+            })}
+          </Fragment>
+        );
+      })}
+    </>
   );
 };

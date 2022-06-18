@@ -24,18 +24,26 @@ export const createPlanetMachine = (planet: TPlanet) => {
                 "commit",
               ],
             },
-            "establish-route": {
+            "toggle-route": {
               actions: [
                 assign((context, event) => {
-                  return {
-                    routes: [
-                      ...context.routes,
-                      { destination: event.destination },
-                    ],
-                  };
+                  const routesWithoutDestination = context.routes.filter(
+                    (route) => route.destination !== event.destination
+                  );
+                  if (
+                    routesWithoutDestination.length != context.routes.length
+                  ) {
+                    return { routes: routesWithoutDestination };
+                  } else {
+                    return {
+                      routes: [
+                        ...context.routes,
+                        { destination: event.destination },
+                      ],
+                    };
+                  }
                 }),
                 "commit",
-                log(),
               ],
             },
           },

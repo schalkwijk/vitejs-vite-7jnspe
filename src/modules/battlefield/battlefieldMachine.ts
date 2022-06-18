@@ -152,7 +152,7 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         },
         actions: send(
           (_context, event) => ({
-            type: "establish-route",
+            type: "toggle-route",
             destination: event.targetPlanetId,
           }),
           {
