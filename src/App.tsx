@@ -1,11 +1,11 @@
 import { Fragment, useRef } from "react";
-import { Stage, Layer, Line } from "react-konva";
+import { Stage, Layer, Line, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 import { animated, useSpring } from "@react-spring/konva";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
 import { angleBetweenPlanets, TPlanet } from "./modules/planet/planet";
-import { Planet } from "./modules/planet/planetComponent";
+import { Planet, RouteIndicator } from "./modules/planet/planetComponent";
 
 const RouteStart = ({
   sourcePlanet,
@@ -130,7 +130,25 @@ const App = () => {
         })}
 
         {planets.map((planet) => {
-          return <Planet key={planet.id} {...planet} />;
+          const groupKey = planet.id + "-with-routes";
+          return (
+            <Group key={groupKey}>
+              <Planet {...planet} />
+              {planet.routes.map(({ destination }) => {
+                const targetPlanet = planets.find(
+                  (planet) => planet.id === destination
+                )!;
+                const key = planet.id + "-" + targetPlanet.id;
+                return (
+                  <RouteIndicator
+                    key={key}
+                    sourcePlanet={planet}
+                    targetPlanet={targetPlanet}
+                  />
+                );
+              })}
+            </Group>
+          );
         })}
       </Layer>
     </Stage>

@@ -10,7 +10,7 @@ export const createPlanetMachine = (planet: TPlanet) => {
         ...planet,
         tick: 0,
         selected: false,
-        routes: []
+        routes: [],
       },
       initial: "running",
       states: {
@@ -24,13 +24,18 @@ export const createPlanetMachine = (planet: TPlanet) => {
                 "commit",
               ],
             },
-            'establish-route': {
+            "establish-route": {
               actions: [
                 assign((context, event) => {
-                  return { routes: [...context.routes, { destination: event.destination }]};
+                  return {
+                    routes: [
+                      ...context.routes,
+                      { destination: event.destination },
+                    ],
+                  };
                 }),
                 "commit",
-                log()
+                log(),
               ],
             },
           },

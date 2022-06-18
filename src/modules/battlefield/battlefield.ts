@@ -96,6 +96,7 @@ const generatePlanets = ({
       color: colors[getRandomInt(0, 3)],
       id: uuid(),
       tick: 0,
+      routes: [],
       ...positionAndRadius,
     });
   }
