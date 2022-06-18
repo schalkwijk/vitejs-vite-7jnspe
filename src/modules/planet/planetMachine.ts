@@ -1,18 +1,16 @@
+import { log } from "xstate/lib/actions";
 import { createMachine, assign, sendParent } from "xstate";
 
 import { TPlanet } from "./planet";
 
-type TEvents = {
-  type: "tick" | "select" | "deselect";
-};
-
 export const createPlanetMachine = (planet: TPlanet) => {
-  return createMachine<TPlanet, TEvents>(
+  return createMachine<TPlanet>(
     {
       context: {
         ...planet,
         tick: 0,
         selected: false,
+        routes: []
       },
       initial: "running",
       states: {
@@ -24,6 +22,15 @@ export const createPlanetMachine = (planet: TPlanet) => {
                   return { tick: context.tick + 1 };
                 }),
                 "commit",
+              ],
+            },
+            'establish-route': {
+              actions: [
+                assign((context, event) => {
+                  return { routes: [...context.routes, { destination: event.destination }]};
+                }),
+                "commit",
+                log()
               ],
             },
           },

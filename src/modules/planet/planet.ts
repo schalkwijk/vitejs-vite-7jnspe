@@ -5,6 +5,11 @@ export type TPlanet = {
   position: [number, number];
   tick: number;
   selected: boolean;
+  routes: Array<TRoute>;
+};
+
+export type TRoute = {
+  destination: TPlanet["id"];
 };
 
 export type PositionAndRadius = Pick<TPlanet, "position" | "radius">;

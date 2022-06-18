@@ -1,5 +1,6 @@
+import _ from "lodash";
 import { createMachine, assign, spawn, send } from "xstate";
-import { pure, choose, sendParent, log } from "xstate/lib/actions";
+import { pure, choose, sendParent } from "xstate/lib/actions";
 
 import { TPlanet } from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
@@ -144,7 +145,23 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         internal: false,
       },
       "planet.linked": {
-        actions: log(),
+        cond: (context, { sourcePlanetId, targetPlanetId }) => {
+          return !!context.routes.find((route) =>
+            _.isEqual(new Set(route), new Set([sourcePlanetId, targetPlanetId]))
+          );
+        },
+        actions: send(
+          (_context, event) => ({
+            type: "establish-route",
+            destination: event.targetPlanetId,
+          }),
+          {
+            to: (context, event) =>
+              context.planets.find(
+                (planet) => planet.id === event.sourcePlanetId
+              )?.machine,
+          }
+        ),
       },
       "planet.clicked": {
         actions: pure((context, event) => {
