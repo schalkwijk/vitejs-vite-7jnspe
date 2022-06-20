@@ -39,7 +39,7 @@ export const createPlanetMachine = (planet: TPlanet) => {
         select: {
           actions: [
             assign({
-              selected: (_context) => true,
+              selected: (context) => !context.selected,
             }),
             "commit",
           ],
