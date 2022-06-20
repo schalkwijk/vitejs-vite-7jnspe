@@ -5,7 +5,6 @@ export type TPlanet = {
   position: [number, number];
   tick: number;
   selected: boolean;
-  routes: Array<TRoute>;
 };
 
 export type TRoute = {

@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { createMachine, assign, spawn, send } from "xstate";
-import { pure, choose, sendParent } from "xstate/lib/actions";
+import { pure, choose, sendParent, log } from "xstate/lib/actions";
 
 import { TPlanet } from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
@@ -9,7 +9,8 @@ import { generateBattlefield } from "./battlefield";
 export type TBox = [number, number];
 export type TBattlefield = {
   planets: Array<TPlanet & { machine: any }>; // TODO: fix any
-  routes: Array<[TPlanet["id"], TPlanet["id"]]>;
+  edges: Array<[TPlanet["id"], TPlanet["id"]]>;
+  routes: Record<TPlanet["id"], Set<TPlanet["id"]>>;
   box: TBox;
   planetCount: number;
   tick: number;
@@ -145,23 +146,33 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         internal: false,
       },
       "planet.linked": {
-        cond: (context, { sourcePlanetId, targetPlanetId }) => {
-          return !!context.routes.find((route) =>
-            _.isEqual(new Set(route), new Set([sourcePlanetId, targetPlanetId]))
-          );
-        },
-        actions: send(
-          (_context, event) => ({
-            type: "toggle-route",
-            destination: event.targetPlanetId,
-          }),
+        actions: choose([
           {
-            to: (context, event) =>
-              context.planets.find(
-                (planet) => planet.id === event.sourcePlanetId
-              )?.machine,
-          }
-        ),
+            cond: (context, { sourcePlanetId, targetPlanetId }) =>
+              !context.routes[sourcePlanetId]?.has(targetPlanetId),
+            actions: assign({
+              routes: (context, { sourcePlanetId, targetPlanetId }) => {
+                const newRoutes = { ...context.routes };
+
+                if (!newRoutes[sourcePlanetId])
+                  newRoutes[sourcePlanetId] = new Set();
+                newRoutes[sourcePlanetId].add(targetPlanetId);
+                console.log({ newRoutes });
+
+                return newRoutes;
+              },
+            }),
+          },
+          {
+            actions: assign({
+              routes: (context, { sourcePlanetId, targetPlanetId }) => {
+                const newRoutes = { ...context.routes };
+                newRoutes[sourcePlanetId]?.delete(targetPlanetId);
+                return newRoutes;
+              },
+            }),
+          },
+        ]),
       },
       "planet.clicked": {
         actions: pure((context, event) => {

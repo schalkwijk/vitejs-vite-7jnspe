@@ -20,7 +20,7 @@ export const generateBattlefield = ({
 }): TBattlefield => {
   const planets = generatePlanets({ count: planetCount, box });
 
-  const routes: TBattlefield["routes"] = [];
+  const edges: TBattlefield["edges"] = [];
   let [firstPlanet, ...outOfNetwork] = planets;
   const inNetwork = [firstPlanet];
 
@@ -42,10 +42,17 @@ export const generateBattlefield = ({
 
     inNetwork.push(planets.find((planet) => planet.id === closest.route[1])!);
 
-    routes.push([closest.route[0], closest.route[1]]);
+    edges.push([closest.route[0], closest.route[1]]);
   }
 
-  return { routes, planets: planets as any, box, planetCount, tick: 0 };
+  return {
+    edges,
+    planets: planets as any,
+    box,
+    planetCount,
+    tick: 0,
+    routes: {},
+  };
 };
 
 export const useBattlefield = (
@@ -97,6 +104,7 @@ const generatePlanets = ({
       id: uuid(),
       tick: 0,
       routes: [],
+      selected: false,
       ...positionAndRadius,
     });
   }

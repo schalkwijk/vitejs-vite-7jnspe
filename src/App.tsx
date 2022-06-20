@@ -5,6 +5,7 @@ import { Html } from "react-konva-utils";
 import { useBattlefield } from "./modules/battlefield/battlefield";
 import { TPlanet } from "./modules/planet/planet";
 import { Planets } from "./modules/planet/planetComponent";
+import { Routes } from "./modules/routes/routeComponent";
 
 const App = () => {
   const width = window.innerWidth - 100;
@@ -18,9 +19,7 @@ const App = () => {
 
   const regenerateBattlefield = () => triggerEvent("reset");
 
-  const planets = battlefield.context.planets;
-  const routes = battlefield.context.routes;
-  const mouse = battlefield.context.mouse;
+  const { planets, edges, routes, mouse } = battlefield.context;
 
   const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
     const gradient: any =
@@ -64,7 +63,7 @@ const App = () => {
           </button>
         </Html>
 
-        {routes.map(([firstPlanetId, secondPlanetId]) => {
+        {edges.map(([firstPlanetId, secondPlanetId]) => {
           const firstPlanet = planets.find(
             (candidate) => candidate.id === firstPlanetId
           );
@@ -84,6 +83,7 @@ const App = () => {
         })}
 
         <Planets planets={planets} />
+        <Routes planets={planets} routes={routes} />
       </Layer>
     </Stage>
   );
