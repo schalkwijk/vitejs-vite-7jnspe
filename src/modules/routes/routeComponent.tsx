@@ -1,14 +1,16 @@
 import { RegularPolygon } from "react-konva";
 
 import { TBattlefield } from "../battlefield/battlefieldMachine";
-import { angleBetweenPlanets, TPlanet } from "../planet/planet";
+import { angleBetweenPlanets, planetColor, TPlanet } from "../planet/planet";
 
 export const RouteIndicator = ({
   sourcePlanet,
   targetPlanet,
+  players,
 }: {
   sourcePlanet: TPlanet;
   targetPlanet: TPlanet;
+  players: TBattlefield["players"];
 }) => {
   const { degrees, radians } = angleBetweenPlanets({
     sourcePlanet,
@@ -18,6 +20,7 @@ export const RouteIndicator = ({
   const x = Math.cos(radians) * sourcePlanet.radius + sourcePlanet.position[0];
   const y = // -1 since the y axis increases when you go down
     -1 * Math.sin(radians) * sourcePlanet.radius + sourcePlanet.position[1];
+  const color = planetColor({ planet: sourcePlanet, players });
 
   return (
     <RegularPolygon
@@ -25,7 +28,7 @@ export const RouteIndicator = ({
       sides={3}
       x={x}
       y={y}
-      fill={sourcePlanet.color}
+      fill={color}
       opacity={0.9}
       // the 90 is here since konva sees rotations
       // as angles clockwise from the y axis, while regular
@@ -38,7 +41,8 @@ export const RouteIndicator = ({
 export const Routes = ({
   routes,
   planets,
-}: Pick<TBattlefield, "routes" | "planets">) => {
+  players,
+}: Pick<TBattlefield, "routes" | "planets" | "players">) => {
   const findPlanet = (targetId: TPlanet["id"]) => {
     return planets.find((planet) => planet.id === targetId);
   };
@@ -60,6 +64,7 @@ export const Routes = ({
           <RouteIndicator
             sourcePlanet={sourcePlanet}
             targetPlanet={targetPlanet}
+            players={players}
             key={key}
           />
         );

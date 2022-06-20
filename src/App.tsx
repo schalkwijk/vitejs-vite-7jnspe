@@ -3,7 +3,7 @@ import { Stage, Layer, Line } from "react-konva";
 import { Html } from "react-konva-utils";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
-import { TPlanet } from "./modules/planet/planet";
+import { planetColor, TPlanet } from "./modules/planet/planet";
 import { Planets } from "./modules/planet/planetComponent";
 import { Routes } from "./modules/routes/routeComponent";
 
@@ -19,7 +19,7 @@ const App = () => {
 
   const regenerateBattlefield = () => triggerEvent("reset");
 
-  const { planets, edges, routes, mouse } = battlefield.context;
+  const { planets, edges, routes, mouse, players } = battlefield.context;
 
   const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
     const gradient: any =
@@ -30,8 +30,8 @@ const App = () => {
         .createLinearGradient(...[...planetA.position, ...planetB.position]);
 
     if (gradient) {
-      gradient.addColorStop(0.0, planetA.color);
-      gradient.addColorStop(1.0, planetB.color);
+      gradient.addColorStop(0.0, planetColor({ planet: planetA, players }));
+      gradient.addColorStop(1.0, planetColor({ planet: planetB, players }));
     }
 
     return gradient;
@@ -82,8 +82,8 @@ const App = () => {
           );
         })}
 
-        <Planets planets={planets} />
-        <Routes planets={planets} routes={routes} />
+        <Planets planets={planets} players={players} />
+        <Routes planets={planets} routes={routes} players={players} />
       </Layer>
     </Stage>
   );

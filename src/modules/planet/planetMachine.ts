@@ -10,8 +10,18 @@ export const createPlanetMachine = (planet: TPlanet) => {
         tick: 0,
         selected: false,
       },
-      initial: "running",
+      initial: "dormant",
       states: {
+        dormant: {
+          on: {
+            captured: {
+              actions: assign({
+                capturedBy: (_context, event) => event.capturedBy,
+              }),
+              target: "running",
+            },
+          },
+        },
         running: {
           on: {
             tick: {

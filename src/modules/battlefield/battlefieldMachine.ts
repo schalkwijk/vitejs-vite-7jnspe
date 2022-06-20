@@ -1,12 +1,13 @@
 import _ from "lodash";
 import { createMachine, assign, spawn, send } from "xstate";
-import { pure, choose, sendParent, log } from "xstate/lib/actions";
+import { pure, choose, sendParent } from "xstate/lib/actions";
 
 import { TPlanet } from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
 import { generateBattlefield } from "./battlefield";
 
 export type TBox = [number, number];
+export type TPlayer = { color: string; id: string };
 export type TBattlefield = {
   planets: Array<TPlanet & { machine: any }>; // TODO: fix any
   edges: Array<[TPlanet["id"], TPlanet["id"]]>;
@@ -14,6 +15,7 @@ export type TBattlefield = {
   box: TBox;
   planetCount: number;
   tick: number;
+  players: Array<TPlayer>;
 };
 
 type TMouse = { activePlanetId: string | null };
@@ -154,10 +156,10 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
               routes: (context, { sourcePlanetId, targetPlanetId }) => {
                 const newRoutes = { ...context.routes };
 
-                if (!newRoutes[sourcePlanetId])
+                if (!newRoutes[sourcePlanetId]) {
                   newRoutes[sourcePlanetId] = new Set();
+                }
                 newRoutes[sourcePlanetId].add(targetPlanetId);
-                console.log({ newRoutes });
 
                 return newRoutes;
               },

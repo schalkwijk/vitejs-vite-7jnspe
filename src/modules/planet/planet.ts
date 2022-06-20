@@ -1,6 +1,8 @@
+import { TBattlefield } from "../battlefield/battlefieldMachine";
+
 export type TPlanet = {
   id: string;
-  color: string;
+  capturedBy: null | string;
   radius: number;
   position: [number, number];
   tick: number;
@@ -29,4 +31,16 @@ export const angleBetweenPlanets = ({
   const degrees = radians * (180 / Math.PI);
 
   return { radians, degrees };
+};
+
+export const planetColor = ({
+  planet,
+  players,
+}: {
+  planet: TPlanet;
+  players: TBattlefield["players"];
+}) => {
+  return planet.capturedBy
+    ? players.find((player) => player.id === planet.capturedBy)!.color
+    : "#808080";
 };

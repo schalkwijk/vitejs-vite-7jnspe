@@ -1,9 +1,16 @@
 import { Circle, RegularPolygon, Group } from "react-konva";
 import { animated, useSpring } from "@react-spring/konva";
 
-import { TPlanet } from "./planet";
+import { planetColor, TPlanet } from "./planet";
+import { TBattlefield } from "../battlefield/battlefieldMachine";
 
-export const Planet = ({ color, radius, position, selected, id }: TPlanet) => {
+export const Planet = ({
+  planet,
+  players,
+}: {
+  planet: TPlanet;
+  players: TBattlefield["players"];
+}) => {
   const styles = useSpring({
     from: { rotation: 0 },
     to: {
@@ -12,6 +19,9 @@ export const Planet = ({ color, radius, position, selected, id }: TPlanet) => {
     config: { duration: 2500 },
     loop: true,
   });
+
+  const { id, radius, position, selected } = planet;
+  const color = planetColor({ planet, players });
 
   return (
     <Group id={id} type="planet">
@@ -31,11 +41,14 @@ export const Planet = ({ color, radius, position, selected, id }: TPlanet) => {
   );
 };
 
-export const Planets = ({ planets }: { planets: Array<TPlanet> }) => {
+export const Planets = ({
+  planets,
+  players,
+}: Pick<TBattlefield, "planets" | "players">) => {
   return (
     <>
       {planets.map((planet) => {
-        return <Planet {...planet} key={planet.id} />;
+        return <Planet planet={planet} players={players} key={planet.id} />;
       })}
     </>
   );

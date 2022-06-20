@@ -45,10 +45,19 @@ export const generateBattlefield = ({
     edges.push([closest.route[0], closest.route[1]]);
   }
 
+  const players = [
+    { color: "#7FDBFF", id: uuid() },
+    { color: "#39CCCC", id: uuid() },
+  ];
+
+  planets[0].capturedBy = players[0].id;
+  planets[planetCount - 1].capturedBy = players[1].id;
+
   return {
     edges,
     planets: planets as any,
     box,
+    players,
     planetCount,
     tick: 0,
     routes: {},
@@ -83,7 +92,6 @@ const generatePlanets = ({
   count: number;
   box: [number, number];
 }): Array<TPlanet> => {
-  const colors = ["#7FDBFF", "#39CCCC", "#FF851B", "#FFFFFF"];
   const planets: Array<TPlanet> = [];
 
   const getPositionAndRadius = (): PositionAndRadius => {
@@ -100,13 +108,13 @@ const generatePlanets = ({
     }
 
     planets.push({
-      color: colors[getRandomInt(0, 3)],
       id: uuid(),
       tick: 0,
-      routes: [],
       selected: false,
+      capturedBy: null,
       ...positionAndRadius,
     });
   }
+
   return planets;
 };
