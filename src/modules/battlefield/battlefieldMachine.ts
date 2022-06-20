@@ -148,6 +148,12 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
         internal: false,
       },
       "planet.linked": {
+        cond: (context, { sourcePlanetId }) => {
+          const sourcePlanet = context.planets.find(
+            (planet) => planet.id === sourcePlanetId
+          );
+          return context.players[0].id === sourcePlanet?.capturedBy;
+        },
         actions: choose([
           {
             cond: (context, { sourcePlanetId, targetPlanetId }) =>
