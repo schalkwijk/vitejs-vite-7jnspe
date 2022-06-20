@@ -2,12 +2,20 @@ import _ from "lodash";
 import { createMachine, assign, spawn, send } from "xstate";
 import { pure, choose, sendParent } from "xstate/lib/actions";
 
-import { TPlanet } from "../planet/planet";
+import { planetColor, TPlanet } from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
 import { generateBattlefield } from "./battlefield";
+import { TPosition } from "../util";
 
 export type TBox = [number, number];
 export type TPlayer = { color: string; id: string };
+export type TFleet = {
+  color: string;
+  sourcePlanetId: TPlanet["id"];
+  targetPlanetId: TPlanet["id"];
+  size: number;
+  position: TPosition;
+};
 export type TBattlefield = {
   planets: Array<TPlanet & { machine: any }>; // TODO: fix any
   edges: Array<[TPlanet["id"], TPlanet["id"]]>;
@@ -16,6 +24,7 @@ export type TBattlefield = {
   planetCount: number;
   tick: number;
   players: Array<TPlayer>;
+  fleets: Array<TFleet>;
 };
 
 type TMouse = { activePlanetId: string | null };
@@ -199,6 +208,33 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                 ? { ...planet, ...event.planet }
                 : planet;
             });
+          },
+        }),
+      },
+      "planet.produce": {
+        actions: assign({
+          fleets: (
+            { players, routes, fleets, planets },
+            { planetId, fleetSize }
+          ) => {
+            const planetRoutes = [...(routes[planetId] || [])];
+            const sourcePlanet = planets.find(
+              (planet) => planet.id === planetId
+            )!;
+
+            const newFleets: Array<TFleet> = planetRoutes.map(
+              (targetPlanetId) => {
+                return {
+                  sourcePlanetId: planetId,
+                  targetPlanetId,
+                  color: planetColor({ planet: sourcePlanet, players }),
+                  size: fleetSize / planetRoutes.length,
+                  position: sourcePlanet.position,
+                };
+              }
+            );
+
+            return [...fleets, ...newFleets];
           },
         }),
       },

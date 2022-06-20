@@ -60,6 +60,7 @@ export const generateBattlefield = ({
     players,
     planetCount,
     tick: 0,
+    fleets: [],
     routes: {},
   };
 };

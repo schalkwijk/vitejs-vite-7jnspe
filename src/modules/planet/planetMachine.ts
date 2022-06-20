@@ -1,4 +1,5 @@
 import { createMachine, assign, sendParent } from "xstate";
+import { pure } from "xstate/lib/actions";
 
 import { TPlanet } from "./planet";
 
@@ -10,7 +11,7 @@ export const createPlanetMachine = (planet: TPlanet) => {
         tick: 0,
         selected: false,
       },
-      initial: "dormant",
+      initial: planet.capturedBy ? "running" : "dormant",
       states: {
         dormant: {
           on: {
@@ -28,6 +29,18 @@ export const createPlanetMachine = (planet: TPlanet) => {
               actions: [
                 assign((context) => {
                   return { tick: context.tick + 1 };
+                }),
+                pure((context) => {
+                  const shouldProduce = context.tick % 2 === 0;
+                  if (shouldProduce) {
+                    return sendParent({
+                      type: "planet.produce",
+                      planetId: context.id,
+                      fleetSize: context.radius,
+                    });
+                  } else {
+                    return [];
+                  }
                 }),
                 "commit",
               ],

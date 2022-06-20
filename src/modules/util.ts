@@ -1,6 +1,5 @@
-import { TPlanet } from "./planet/planet";
-
-type JustPosition = Pick<TPlanet, "position">;
+export type TPosition = [number, number];
+type JustPosition = { position: TPosition };
 
 export const distance = (
   { position: positionA }: JustPosition,
