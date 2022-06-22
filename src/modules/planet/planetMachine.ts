@@ -31,7 +31,7 @@ export const createPlanetMachine = (planet: TPlanet) => {
                   return { tick: context.tick + 1 };
                 }),
                 pure((context) => {
-                  const shouldProduce = context.tick % 2 === 0;
+                  const shouldProduce = context.tick % 150 === 0;
                   if (shouldProduce) {
                     return sendParent({
                       type: "planet.produce",

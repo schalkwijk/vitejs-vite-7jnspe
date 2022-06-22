@@ -44,3 +44,10 @@ export const planetColor = ({
     ? players.find((player) => player.id === planet.capturedBy)!.color
     : "#808080";
 };
+
+export const findPlanet = (
+  planets: Array<TPlanet>,
+  planetId: TPlanet["id"]
+) => {
+  return planets.find((planet) => planet.id === planetId)!;
+};

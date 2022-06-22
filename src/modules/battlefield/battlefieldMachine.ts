@@ -1,21 +1,32 @@
 import _ from "lodash";
 import { createMachine, assign, spawn, send } from "xstate";
 import { pure, choose, sendParent } from "xstate/lib/actions";
+import { v4 as uuid } from "uuid";
 
-import { planetColor, TPlanet } from "../planet/planet";
+import {
+  angleBetweenPlanets,
+  findPlanet,
+  planetColor,
+  TPlanet,
+} from "../planet/planet";
 import { createPlanetMachine } from "../planet/planetMachine";
 import { generateBattlefield } from "./battlefield";
-import { TPosition } from "../util";
+import { distance, TPosition } from "../util";
 
 export type TBox = [number, number];
 export type TPlayer = { color: string; id: string };
 export type TFleet = {
+  id: string;
   color: string;
   sourcePlanetId: TPlanet["id"];
   targetPlanetId: TPlanet["id"];
   size: number;
   position: TPosition;
+  dx: number;
+  dy: number;
+  angle: number;
 };
+
 export type TBattlefield = {
   planets: Array<TPlanet & { machine: any }>; // TODO: fix any
   edges: Array<[TPlanet["id"], TPlanet["id"]]>;
@@ -28,6 +39,8 @@ export type TBattlefield = {
 };
 
 type TMouse = { activePlanetId: string | null };
+
+const TICK = 1_000;
 
 const createMouseMachine = () => {
   return createMachine<TMouse>(
@@ -123,7 +136,7 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
           src: (_context) => (send) => {
             const interval = setInterval(() => {
               send("tick");
-            }, 1000);
+            }, 10);
 
             return () => {
               clearInterval(interval);
@@ -140,6 +153,28 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                 return context.planets.map((planet) => {
                   return send({ type: "tick" }, { to: planet.machine });
                 });
+              }),
+              assign({
+                fleets: ({ fleets, planets }) => {
+                  const newFleets = fleets
+                    .map((fleet) => {
+                      const newPosition = [
+                        fleet.position[0] + fleet.dx,
+                        fleet.position[1] + fleet.dy,
+                      ] as TPosition;
+                      return { ...fleet, position: newPosition };
+                    })
+                    .filter(({ position, targetPlanetId }) => {
+                      const planet = findPlanet(planets, targetPlanetId);
+                      const distanceBetweenPlanetAndFleet = distance(
+                        { position },
+                        planet
+                      );
+                      return distanceBetweenPlanetAndFleet > planet.radius + 7; // TODO: don't use magic number here (this is the fleet radius when drawn)
+                    });
+
+                  return newFleets;
+                },
               }),
             ],
           },
@@ -218,18 +253,27 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
             { planetId, fleetSize }
           ) => {
             const planetRoutes = [...(routes[planetId] || [])];
-            const sourcePlanet = planets.find(
-              (planet) => planet.id === planetId
-            )!;
+            const sourcePlanet = findPlanet(planets, planetId);
 
             const newFleets: Array<TFleet> = planetRoutes.map(
               (targetPlanetId) => {
+                const targetPlanet = findPlanet(planets, targetPlanetId);
                 return {
                   sourcePlanetId: planetId,
                   targetPlanetId,
                   color: planetColor({ planet: sourcePlanet, players }),
                   size: fleetSize / planetRoutes.length,
                   position: sourcePlanet.position,
+                  dx:
+                    (targetPlanet.position[0] - sourcePlanet.position[0]) /
+                    TICK,
+                  dy:
+                    (targetPlanet.position[1] - sourcePlanet.position[1]) /
+                    TICK,
+                  angle:
+                    90 -
+                    angleBetweenPlanets({ sourcePlanet, targetPlanet }).degrees,
+                  id: uuid(),
                 };
               }
             );

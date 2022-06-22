@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Stage, Layer, Line } from "react-konva";
+import { Stage, Layer, Line, RegularPolygon } from "react-konva";
 import { Html } from "react-konva-utils";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
@@ -19,7 +19,8 @@ const App = () => {
 
   const regenerateBattlefield = () => triggerEvent("reset");
 
-  const { planets, edges, routes, mouse, players } = battlefield.context;
+  const { planets, edges, routes, mouse, players, fleets } =
+    battlefield.context;
 
   const gradientCreator = (planetA: TPlanet, planetB: TPlanet) => {
     const gradient: any =
@@ -84,6 +85,20 @@ const App = () => {
 
         <Planets planets={planets} players={players} />
         <Routes planets={planets} routes={routes} players={players} />
+        {fleets.length > 0 &&
+          fleets.map((fleet) => {
+            return (
+              <RegularPolygon
+                rotation={fleet.angle}
+                key={fleet.id}
+                sides={3}
+                x={fleet.position[0]}
+                y={fleet.position[1]}
+                radius={7}
+                fill={fleet.color}
+              />
+            );
+          })}
       </Layer>
     </Stage>
   );
