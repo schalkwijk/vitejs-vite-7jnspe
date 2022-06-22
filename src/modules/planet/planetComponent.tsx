@@ -1,4 +1,4 @@
-import { Circle, RegularPolygon, Group } from "react-konva";
+import { Circle, Text, Group } from "react-konva";
 import { animated, useSpring } from "@react-spring/konva";
 
 import { planetColor, TPlanet } from "./planet";
@@ -22,10 +22,18 @@ export const Planet = ({
 
   const { id, radius, position, selected } = planet;
   const color = planetColor({ planet, players });
+  const fontSize = 15;
 
   return (
     <Group id={id} type="planet">
       <Circle fill={color} radius={radius} x={position[0]} y={position[1]} />
+      <Text
+        fontSize={fontSize}
+        fill={"#FFFFFF"}
+        text={radius.toString()}
+        x={position[0] - fontSize / 2 - 2}
+        y={position[1] - fontSize / 2}
+      />
       {selected && (
         <animated.Circle
           stroke={color}

@@ -276,7 +276,7 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                   sourcePlanetId: planetId,
                   targetPlanetId,
                   color: planetColor({ planet: sourcePlanet, players }),
-                  size: fleetSize / planetRoutes.length,
+                  size: Math.round(fleetSize / planetRoutes.length),
                   position: [x, y],
                   dx:
                     (targetPlanet.position[0] - x) /
