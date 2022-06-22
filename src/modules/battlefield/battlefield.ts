@@ -70,7 +70,7 @@ export const useBattlefield = (
 ) => {
   const machine = useMemo(() => {
     return createBattlefieldMachine(generateBattlefield(options));
-  }, []);
+  }, [1]);
 
   return useMachine(machine);
 };

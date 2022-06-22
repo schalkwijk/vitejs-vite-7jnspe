@@ -1,7 +1,12 @@
 import { RegularPolygon } from "react-konva";
 
 import { TBattlefield } from "../battlefield/battlefieldMachine";
-import { angleBetweenPlanets, planetColor, TPlanet } from "../planet/planet";
+import {
+  angleBetweenPlanets,
+  edgeOfPlanet,
+  planetColor,
+  TPlanet,
+} from "../planet/planet";
 
 export const RouteIndicator = ({
   sourcePlanet,
@@ -17,10 +22,8 @@ export const RouteIndicator = ({
     targetPlanet,
   });
 
-  const x = Math.cos(radians) * sourcePlanet.radius + sourcePlanet.position[0];
-  const y = // -1 since the y axis increases when you go down
-    -1 * Math.sin(radians) * sourcePlanet.radius + sourcePlanet.position[1];
   const color = planetColor({ planet: sourcePlanet, players });
+  const { x, y } = edgeOfPlanet({ planet: sourcePlanet, radians });
 
   return (
     <RegularPolygon

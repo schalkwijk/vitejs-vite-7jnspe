@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Stage, Layer, Line, RegularPolygon } from "react-konva";
+import { Stage, Layer, Line, RegularPolygon, Text, Group } from "react-konva";
 import { Html } from "react-konva-utils";
 
 import { useBattlefield } from "./modules/battlefield/battlefield";
@@ -79,6 +79,7 @@ const App = () => {
               points={[...firstPlanet!.position, ...secondPlanet!.position]}
               strokeWidth={2}
               stroke={gradientCreator(firstPlanet!, secondPlanet!)}
+              dash={[10, 5]}
             />
           );
         })}
@@ -88,15 +89,24 @@ const App = () => {
         {fleets.length > 0 &&
           fleets.map((fleet) => {
             return (
-              <RegularPolygon
-                rotation={fleet.angle}
-                key={fleet.id}
-                sides={3}
-                x={fleet.position[0]}
-                y={fleet.position[1]}
-                radius={7}
-                fill={fleet.color}
-              />
+              <Group key={fleet.id}>
+                <RegularPolygon
+                  rotation={fleet.angle}
+                  sides={3}
+                  x={fleet.position[0]}
+                  y={fleet.position[1]}
+                  radius={7}
+                  fill={fleet.color}
+                />
+                <Text
+                  fontSize={15}
+                  fontStyle={"bold"}
+                  text={fleet.size.toString()}
+                  fill={"#FFFFFF"}
+                  x={fleet.position[0]}
+                  y={fleet.position[1]}
+                />
+              </Group>
             );
           })}
       </Layer>

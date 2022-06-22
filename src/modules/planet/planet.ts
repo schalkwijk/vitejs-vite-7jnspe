@@ -51,3 +51,16 @@ export const findPlanet = (
 ) => {
   return planets.find((planet) => planet.id === planetId)!;
 };
+
+export const edgeOfPlanet = ({
+  planet,
+  radians,
+}: {
+  planet: TPlanet;
+  radians: number;
+}) => {
+  const x = Math.cos(radians) * planet.radius + planet.position[0];
+  const y = -1 * Math.sin(radians) * planet.radius + planet.position[1]; // -1 since the y axis increases when you go down
+
+  return { x, y };
+};

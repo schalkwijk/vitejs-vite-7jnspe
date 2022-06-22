@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 
 import {
   angleBetweenPlanets,
+  edgeOfPlanet,
   findPlanet,
   planetColor,
   TPlanet,
@@ -262,23 +263,30 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                   sourcePlanet,
                   targetPlanet
                 );
+                const { radians, degrees } = angleBetweenPlanets({
+                  sourcePlanet,
+                  targetPlanet,
+                });
+                const { x, y } = edgeOfPlanet({
+                  planet: sourcePlanet,
+                  radians,
+                });
+
                 return {
                   sourcePlanetId: planetId,
                   targetPlanetId,
                   color: planetColor({ planet: sourcePlanet, players }),
                   size: fleetSize / planetRoutes.length,
-                  position: sourcePlanet.position,
+                  position: [x, y],
                   dx:
-                    (targetPlanet.position[0] - sourcePlanet.position[0]) /
+                    (targetPlanet.position[0] - x) /
                     distanceBetweenPlanetAndFleet /
                     TICK,
                   dy:
-                    (targetPlanet.position[1] - sourcePlanet.position[1]) /
+                    (targetPlanet.position[1] - y) /
                     distanceBetweenPlanetAndFleet /
                     TICK,
-                  angle:
-                    90 -
-                    angleBetweenPlanets({ sourcePlanet, targetPlanet }).degrees,
+                  angle: 90 - degrees,
                   id: uuid(),
                 };
               }
