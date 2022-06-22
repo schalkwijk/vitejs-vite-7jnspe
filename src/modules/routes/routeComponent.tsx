@@ -24,7 +24,7 @@ export const RouteIndicator = ({
 
   return (
     <RegularPolygon
-      radius={sourcePlanet.radius}
+      radius={sourcePlanet.radius / 2}
       sides={3}
       x={x}
       y={y}

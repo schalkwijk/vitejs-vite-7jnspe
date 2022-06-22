@@ -40,7 +40,7 @@ export type TBattlefield = {
 
 type TMouse = { activePlanetId: string | null };
 
-const TICK = 1_000;
+const TICK = 2.5;
 
 const createMouseMachine = () => {
   return createMachine<TMouse>(
@@ -258,6 +258,10 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
             const newFleets: Array<TFleet> = planetRoutes.map(
               (targetPlanetId) => {
                 const targetPlanet = findPlanet(planets, targetPlanetId);
+                const distanceBetweenPlanetAndFleet = distance(
+                  sourcePlanet,
+                  targetPlanet
+                );
                 return {
                   sourcePlanetId: planetId,
                   targetPlanetId,
@@ -266,9 +270,11 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                   position: sourcePlanet.position,
                   dx:
                     (targetPlanet.position[0] - sourcePlanet.position[0]) /
+                    distanceBetweenPlanetAndFleet /
                     TICK,
                   dy:
                     (targetPlanet.position[1] - sourcePlanet.position[1]) /
+                    distanceBetweenPlanetAndFleet /
                     TICK,
                   angle:
                     90 -
