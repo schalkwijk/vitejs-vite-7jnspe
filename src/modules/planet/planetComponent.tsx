@@ -20,7 +20,7 @@ export const Planet = ({
     loop: true,
   });
 
-  const { id, radius, position, selected } = planet;
+  const { id, radius, position, selected, toughness } = planet;
   const color = planetColor({ planet, players });
   const fontSize = 15;
 
@@ -30,7 +30,7 @@ export const Planet = ({
       <Text
         fontSize={fontSize}
         fill={"#FFFFFF"}
-        text={radius.toString()}
+        text={toughness.toString()}
         x={position[0] - fontSize / 2 - 2}
         y={position[1] - fontSize / 2}
       />

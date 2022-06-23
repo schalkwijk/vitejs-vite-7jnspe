@@ -7,6 +7,7 @@ export type TPlanet = {
   position: [number, number];
   tick: number;
   selected: boolean;
+  toughness: number;
 };
 
 export type TRoute = {

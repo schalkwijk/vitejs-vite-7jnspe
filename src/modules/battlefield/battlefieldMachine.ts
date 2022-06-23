@@ -26,6 +26,7 @@ export type TFleet = {
   dx: number;
   dy: number;
   angle: number;
+  playerId: TPlayer["id"];
 };
 
 export type TBattlefield = {
@@ -155,27 +156,42 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                   return send({ type: "tick" }, { to: planet.machine });
                 });
               }),
-              assign({
-                fleets: ({ fleets, planets }) => {
-                  const newFleets = fleets
-                    .map((fleet) => {
-                      const newPosition = [
-                        fleet.position[0] + fleet.dx,
-                        fleet.position[1] + fleet.dy,
-                      ] as TPosition;
-                      return { ...fleet, position: newPosition };
-                    })
-                    .filter(({ position, targetPlanetId }) => {
-                      const planet = findPlanet(planets, targetPlanetId);
-                      const distanceBetweenPlanetAndFleet = distance(
-                        { position },
-                        planet
-                      );
-                      return distanceBetweenPlanetAndFleet > planet.radius + 7; // TODO: don't use magic number here (this is the fleet radius when drawn)
-                    });
+              pure(({ fleets, planets }, _event) => {
+                const impacts: Array<any> = [];
+                const newFleets = fleets
+                  .map((fleet) => {
+                    const newPosition = [
+                      fleet.position[0] + fleet.dx,
+                      fleet.position[1] + fleet.dy,
+                    ] as TPosition;
+                    return { ...fleet, position: newPosition };
+                  })
+                  .filter((fleet) => {
+                    const { position, targetPlanetId } = fleet;
+                    const planet = findPlanet(planets, targetPlanetId);
+                    const distanceBetweenPlanetAndFleet = distance(
+                      { position },
+                      planet
+                    );
 
-                  return newFleets;
-                },
+                    const impact = !(
+                      distanceBetweenPlanetAndFleet >
+                      planet.radius + 7
+                    ); // TODO: don't use magic number here (this is the fleet radius when drawn)
+
+                    if (impact) {
+                      impacts.push(
+                        send(
+                          { type: "impact", planet, fleet },
+                          { to: `planet-${planet.id}` }
+                        )
+                      );
+                    }
+
+                    return !impact;
+                  });
+
+                return [assign({ fleets: () => newFleets }), ...impacts];
               }),
             ],
           },
@@ -288,6 +304,7 @@ export const createBattlefieldMachine = (battlefield: TBattlefield) => {
                     TICK,
                   angle: 90 - degrees,
                   id: uuid(),
+                  playerId: sourcePlanet.capturedBy!,
                 };
               }
             );

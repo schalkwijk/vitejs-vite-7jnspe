@@ -1,5 +1,5 @@
-import { createMachine, assign, sendParent } from "xstate";
-import { pure } from "xstate/lib/actions";
+import { createMachine, assign, sendParent, send } from "xstate";
+import { pure, choose } from "xstate/lib/actions";
 
 import { TPlanet } from "./planet";
 
@@ -15,10 +15,34 @@ export const createPlanetMachine = (planet: TPlanet) => {
       states: {
         dormant: {
           on: {
+            impact: {
+              actions: [
+                assign({
+                  toughness: (context, event) => {
+                    return Math.max(context.toughness - event.fleet.size, 0);
+                  },
+                }),
+                choose([
+                  {
+                    cond: ({ toughness }) => toughness <= 0,
+                    actions: send((_context, event) => {
+                      return {
+                        type: "captured",
+                        capturedBy: event.fleet.playerId,
+                      };
+                    }),
+                  },
+                ]),
+                "commit",
+              ],
+            },
             captured: {
-              actions: assign({
-                capturedBy: (_context, event) => event.capturedBy,
-              }),
+              actions: [
+                assign({
+                  capturedBy: (_context, event) => event.capturedBy,
+                }),
+                "commit",
+              ],
               target: "running",
             },
           },

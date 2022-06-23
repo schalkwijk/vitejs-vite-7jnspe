@@ -113,6 +113,7 @@ const generatePlanets = ({
       tick: 0,
       selected: false,
       capturedBy: null,
+      toughness: positionAndRadius.radius,
       ...positionAndRadius,
     });
   }
